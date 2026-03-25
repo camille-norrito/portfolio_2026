@@ -1,0 +1,167 @@
+---
+import videoSrc from "../assets/portfolio2.mp4";
+---
+
+<div
+    id="loading-screen"
+    class="fixed inset-0 z-[9999] bg-white flex items-center justify-center overflow-hidden"
+>
+    <!-- WRAPPER DE RÉVÉLATION DU TEXTE (MASQUE LOCAL) -->
+    <div
+        id="text-reveal-wrapper"
+        class="absolute z-[10001] overflow-hidden"
+        style="
+            width: 100%;
+            height: 220px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        "
+    >
+        <!-- TEXTE (démarre plus bas, monte dans le masque) -->
+        <h2
+            id="loading-text"
+            class="flex font-horizon text-h1-mobile md:text-h1 text-brown absolute"
+            style="
+                gap: 1rem;
+                left: 50%;
+                top: 100%;
+                transform: translate(-50%, 0);
+            "
+        >
+            <span id="text-left">Camille's</span>
+            <span id="text-right">Website</span>
+        </h2>
+    </div>
+
+    <!-- CONTAINER VIDÉO (V1 STRICT – JAMAIS MASQUÉ) -->
+    <div
+        id="video-container"
+        class="absolute z-[9999]"
+        style="width: 2px; height: 100px; opacity: 0;"
+    >
+        <video
+            id="loading-video"
+            class="w-full h-full object-cover"
+            autoplay
+            muted
+            playsinline
+            preload="auto"
+            loop
+            src={videoSrc}></video>
+    </div>
+</div>
+
+<style>
+    /* Animation du texte qui monte dans son masque */
+    #loading-text {
+        transition:
+            top 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+            gap 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Vidéo (V1 intacte) */
+    #video-container {
+        transition:
+            opacity 0.3s ease-out,
+            width 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+            height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Disparition du texte */
+    .text-fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+    }
+
+    /* Fade out final */
+    #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease-out;
+    }
+</style>
+
+<script>
+    console.log("🎬 Animation: Démarrage (7 secondes exactes)");
+
+    // Bloquer le scroll pendant l'animation
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+        const loadingScreen = document.getElementById("loading-screen");
+        const loadingText = document.getElementById("loading-text");
+        const textLeft = document.getElementById("text-left");
+        const textRight = document.getElementById("text-right");
+        const videoContainer = document.getElementById("video-container");
+
+        if (
+            !loadingScreen ||
+            !loadingText ||
+            !videoContainer ||
+            !textLeft ||
+            !textRight
+        ) {
+            console.error("❌ Éléments manquants!");
+            return;
+        }
+
+        // ÉTAPE 1 (0s → 0.8s)
+        // Texte sort de derrière le masque (COMME L'EXEMPLE)
+        setTimeout(() => {
+            console.log("1️⃣ Texte sort de derrière le masque");
+            loadingText.style.top = "50%";
+            loadingText.style.transform = "translate(-50%, -50%)";
+        }, 100);
+
+        // ÉTAPE 2 (1.0s)
+        // Rectangle vidéo apparaît
+        setTimeout(() => {
+            videoContainer.style.opacity = "1";
+        }, 1000);
+
+        // ÉTAPE 3 (1.5s)
+        // Rectangle → carré + mots s'écartent
+        setTimeout(() => {
+            videoContainer.style.width = "400px";
+            videoContainer.style.height = "400px";
+            loadingText.style.gap = "30rem";
+        }, 1500);
+
+        // ÉTAPE 4 (3.5s)
+        // Carré → rectangle + fade texte
+        setTimeout(() => {
+            videoContainer.style.width = "900px";
+            videoContainer.style.height = "600px";
+
+            textLeft.classList.add("text-fade-out");
+            textRight.classList.add("text-fade-out");
+        }, 3500);
+
+        // ÉTAPE 5 (5.5s)
+        // Rectangle → plein écran
+        setTimeout(() => {
+            videoContainer.style.width = "100vw";
+            videoContainer.style.height = "100vh";
+        }, 5500);
+
+
+        // ÉTAPE 7 (7.0s)
+        // Fin
+        setTimeout(() => {
+            loadingScreen.classList.add("fade-out");
+
+            setTimeout(() => {
+                loadingScreen.remove();
+
+                // Débloquer le scroll
+                document.body.style.overflow = "";
+
+                // Déclencher l'animation du Hero
+                window.dispatchEvent(new CustomEvent("loadingComplete"));
+
+                console.log("✅ Animation terminée");
+            }, 500);
+        }, 7000);
+    }, 100);
+</script>

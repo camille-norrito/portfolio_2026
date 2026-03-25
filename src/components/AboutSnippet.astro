@@ -1,0 +1,155 @@
+---
+// src/components/AboutSnippet.astro
+---
+
+<section
+    id="about-snippet"
+    style="background:#ffffff;display:flex;align-items:stretch;overflow:hidden;min-height:80vh;position:sticky;top:0;z-index:5;"
+>
+    <!-- GAUCHE : vidéo Toronto pleine hauteur -->
+    <div style="flex:0 0 48%;position:relative;overflow:hidden;">
+        <video
+            id="about-vid"
+            autoplay
+            muted
+            loop
+            playsinline
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;"
+        >
+            <source src="/hero.mp4" type="video/mp4" />
+            <source src="/hero.webm" type="video/webm" />
+        </video>
+        <img
+            src="/assets/img/ticket_caisse.png"
+            id="about-vid-fallback"
+            alt="Camille Norrito"
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity 1.2s ease;"
+        />
+    </div>
+
+    <!-- DROITE : texte — identique au doc 19 -->
+    <div
+        id="snippet-text"
+        style="flex:1;padding:6rem 4rem;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateX(30px);transition:opacity 0.8s 0.2s ease, transform 0.8s 0.2s ease;"
+    >
+        <!-- Tag -->
+        <p
+            style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.3em;color:#B50D0B;text-transform:uppercase;margin-bottom:1.5rem;"
+        >
+            ✦ QUI SUIS-JE
+        </p>
+
+        <!-- Titre -->
+        <h2
+            style="font-family:'Horizon';font-size:clamp(32px,4.5vw,64px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.92;margin-bottom:2rem;"
+        >
+            Camille<br />Norrito
+        </h2>
+
+        <!-- Description -->
+        <p
+            style="font-family:'Montserrat';font-size:13px;line-height:1.9;color:rgba(38,31,28,0.6);max-width:480px;margin-bottom:2.5rem;"
+        >
+            Étudiante en 2ème année MMI à Montbéliard, passionnée par le
+            <strong style="color:#261F1C;">design graphique</strong>, le <strong
+                style="color:#261F1C;">branding</strong
+            >, le <strong style="color:#261F1C;">motion design</strong>
+            et la création de contenus audiovisuels.<br /><br />
+            J'aime imaginer des univers visuels cohérents, en accord avec une identité,
+            des valeurs et une intention.
+        </p>
+
+        <!-- Dispo stage -->
+        <div
+            style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2.5rem;"
+        >
+            <div
+                style="width:6px;height:6px;border-radius:50%;background:#B50D0B;flex-shrink:0;"
+            >
+            </div>
+            <p
+                style="font-family:'Montserrat';font-size:11px;color:#261F1C;letter-spacing:0.05em;"
+            >
+                <strong>Disponible en stage</strong> — du 30 mars au 5 juin 2026 ·
+                Design graphique · Branding · Motion
+            </p>
+        </div>
+
+        <!-- CTAs -->
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <a
+                href="/a-propos"
+                style="font-family:'Montserrat';font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#F5F0EA;background:#261F1C;padding:11px 22px;border-radius:30px;text-decoration:none;transition:background 0.3s;"
+                class="snippet-btn-primary"
+            >
+                En savoir plus
+            </a>
+            <a
+                href="/contact"
+                style="font-family:'Montserrat';font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#261F1C;border:1.5px solid rgba(38,31,28,0.3);padding:10px 22px;border-radius:30px;text-decoration:none;transition:all 0.3s;"
+                class="snippet-btn-secondary"
+            >
+                Me contacter
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .snippet-btn-primary:hover {
+        background: #b50d0b !important;
+    }
+    .snippet-btn-secondary:hover {
+        background: #261f1c !important;
+        color: #f5f0ea !important;
+        border-color: #261f1c !important;
+    }
+</style>
+
+<script>
+    (function () {
+        var vid = document.getElementById(
+            "about-vid",
+        ) as HTMLVideoElement | null;
+        var fallback = document.getElementById("about-vid-fallback");
+        var text = document.getElementById("snippet-text");
+
+        // Vidéo : démarrer à 20s comme le hero projets
+        if (vid) {
+            var v = vid;
+            var seekDone = false;
+            function trySeek() {
+                if (seekDone) return;
+                v.currentTime = 20;
+                seekDone = true;
+                v.style.opacity = "1";
+                if (fallback) fallback.style.opacity = "0";
+            }
+            v.addEventListener("loadedmetadata", trySeek);
+            v.addEventListener("canplay", trySeek);
+            v.addEventListener("playing", function () {
+                v.style.opacity = "1";
+                if (fallback) fallback.style.opacity = "0";
+            });
+            setTimeout(function () {
+                v.style.opacity = "1";
+            }, 1000);
+            if (v.readyState >= 1) trySeek();
+        }
+
+        // Reveal texte au scroll
+        if (text) {
+            new IntersectionObserver(
+                function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            text.style.opacity = "1";
+                            text.style.transform = "translateX(0)";
+                        }
+                    });
+                },
+                { threshold: 0.3 },
+            ).observe(text);
+        }
+    })();
+</script>

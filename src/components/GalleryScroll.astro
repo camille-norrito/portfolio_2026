@@ -1,0 +1,215 @@
+---
+// src/components/GalleryScroll.astro
+const PB_URL = "http://127.0.0.1:8090";
+
+let galleries = [];
+try {
+    const res = await fetch(
+        `${PB_URL}/api/collections/galleries/records?sort=order&perPage=50`,
+    );
+    const data = await res.json();
+    galleries = data.items
+        .map((g: any) => {
+            // Prendre les 2 premières photos
+            const photos = (g.photos || [])
+                .slice(0, 2)
+                .map(
+                    (f: string) =>
+                        `${PB_URL}/api/files/${g.collectionId}/${g.id}/${f}`,
+                );
+            return {
+                title: g.title,
+                slug: g.slug,
+                photos,
+            };
+        })
+        .filter((g: any) => g.photos.length > 0);
+} catch (e) {
+    console.error("Erreur fetch galleries:", e);
+}
+
+// Répartir les galleries en 2 colonnes
+const col1 = galleries.filter((_: any, i: number) => i % 2 === 0);
+const col2 = galleries.filter((_: any, i: number) => i % 2 === 1);
+---
+
+<div id="gs-wrapper" style="position:relative;height:300vh;">
+    <section
+        id="gallery-scroll-section"
+        style="position:sticky;top:0;height:100vh;background:#fff;display:flex;overflow:hidden;"
+    >
+        <!-- GAUCHE : texte fixe -->
+        <div
+            id="gs-left"
+            style="flex:0 0 42%;height:100vh;padding:5rem 4rem;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(38,31,28,0.08);"
+        >
+            <div>
+                <p
+                    style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.3em;color:#B50D0B;text-transform:uppercase;margin-bottom:1.5rem;"
+                >
+                    ✦ MES GALERIES
+                </p>
+                <h2
+                    style="font-family:'Montserrat';font-size:clamp(36px,5vw,72px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:2rem;"
+                >
+                    Voyages &amp;<br /> Photographies
+                </h2>
+                <p
+                    style="font-family:'Montserrat';font-size:13px;line-height:1.9;color:rgba(38,31,28,0.55);max-width:340px;"
+                >
+                    Une sélection de photos prises lors de mes voyages et
+                    shootings — Toronto, Vancouver, Bali, Maroc, New York...
+                </p>
+            </div>
+
+            <a
+                href="/projets"
+                style="display:inline-flex;align-items:center;gap:0.75rem;font-family:'Montserrat';font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#F5F0EA;background:#261F1C;padding:12px 24px;border-radius:30px;text-decoration:none;width:fit-content;transition:background 0.3s;"
+                class="gs-cta"
+            >
+                Voir les galeries
+                <svg
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M5 12h14M12 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- DROITE : 2 colonnes de photos qui scrollent en sens inverse -->
+        <div
+            style="flex:1;display:flex;gap:0;overflow:hidden;position:relative;height:100vh;"
+        >
+            <!-- Colonne 1 : scroll vers le HAUT (translateY négatif) -->
+            <div
+                id="gs-col1"
+                style="flex:1;display:flex;flex-direction:column;gap:0;will-change:transform;"
+            >
+                {
+                    col1.map((g: any) =>
+                        g.photos.map((photo: string, pi: number) => (
+                            <a
+                                href={`/gallery/${g.slug}`}
+                                style="display:block;text-decoration:none;position:relative;border-bottom:1px solid rgba(38,31,28,0.06);"
+                                class="gs-card"
+                            >
+                                <div style="overflow:hidden;aspect-ratio:3/4;">
+                                    <img
+                                        src={photo}
+                                        alt={g.title}
+                                        style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;"
+                                        class="gs-img"
+                                    />
+                                </div>
+                                {pi === 0 && (
+                                    <div style="padding:0.75rem 1rem 1rem;">
+                                        <div style="width:100%;height:1px;background:rgba(38,31,28,0.12);margin-bottom:0.5rem;" />
+                                        <p style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#261F1C;text-transform:uppercase;margin:0;">
+                                            {g.title}
+                                        </p>
+                                    </div>
+                                )}
+                            </a>
+                        )),
+                    )
+                }
+            </div>
+
+            <!-- Séparateur -->
+            <div
+                style="width:1px;background:rgba(38,31,28,0.06);flex-shrink:0;"
+            >
+            </div>
+
+            <!-- Colonne 2 : scroll vers le BAS (translateY positif) -->
+            <div
+                id="gs-col2"
+                style="flex:1;display:flex;flex-direction:column;gap:0;will-change:transform;margin-top:-20%;"
+            >
+                {
+                    col2.map((g: any) =>
+                        g.photos.map((photo: string, pi: number) => (
+                            <a
+                                href={`/gallery/${g.slug}`}
+                                style="display:block;text-decoration:none;position:relative;border-bottom:1px solid rgba(38,31,28,0.06);"
+                                class="gs-card"
+                            >
+                                <div style="overflow:hidden;aspect-ratio:3/4;">
+                                    <img
+                                        src={photo}
+                                        alt={g.title}
+                                        style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;"
+                                        class="gs-img"
+                                    />
+                                </div>
+                                {pi === 0 && (
+                                    <div style="padding:0.75rem 1rem 1rem;">
+                                        <div style="width:100%;height:1px;background:rgba(38,31,28,0.12);margin-bottom:0.5rem;" />
+                                        <p style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#261F1C;text-transform:uppercase;margin:0;">
+                                            {g.title}
+                                        </p>
+                                    </div>
+                                )}
+                            </a>
+                        )),
+                    )
+                }
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .gs-cta:hover {
+        background: #b50d0b !important;
+    }
+    .gs-card:hover .gs-img {
+        transform: scale(1.03);
+    }
+</style>
+
+<script>
+    (function () {
+        var section = document.getElementById("gallery-scroll-section");
+        var col1 = document.getElementById("gs-col1") as HTMLElement | null;
+        var col2 = document.getElementById("gs-col2") as HTMLElement | null;
+        if (!section || !col1 || !col2) return;
+
+        var c1 = col1,
+            c2 = col2;
+
+        var wrapper = document.getElementById("gs-wrapper");
+        if (!wrapper) return;
+        var w = wrapper;
+
+        function update() {
+            var rect = w.getBoundingClientRect();
+            var scrolled = -rect.top;
+            if (scrolled < 0) scrolled = 0;
+            var total = w.offsetHeight - window.innerHeight;
+            if (total <= 0) return;
+
+            var progress = Math.min(1, scrolled / total);
+            var winH = window.innerHeight;
+
+            // Col1 : monte — part de 0, finit à -(scrollHeight - winH)
+            var max1 = c1.scrollHeight - winH;
+            c1.style.transform = "translateY(" + -progress * max1 + "px)";
+
+            // Col2 : descend en sens INVERSE — part de -(scrollHeight - winH), finit à 0
+            // Elle commence en bas et remonte vers 0 au lieu de descendre
+            var max2 = c2.scrollHeight - winH;
+            c2.style.transform =
+                "translateY(" + (-max2 + progress * max2) + "px)";
+        }
+
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        update();
+    })();
+</script>

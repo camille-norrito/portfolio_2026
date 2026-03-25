@@ -1,0 +1,197 @@
+---
+// src/pages/contact.astro
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const PB_URL = "http://127.0.0.1:8090";
+const BREVO_API_KEY = import.meta.env.BREVO_API_KEY;
+
+let formSent = false;
+let formError = false;
+
+if (Astro.request.method === "POST") {
+    try {
+        const formData = await Astro.request.formData();
+        const prenom = formData.get("prenom")?.toString().trim() || "";
+        const nom = formData.get("nom")?.toString().trim() || "";
+        const email = formData.get("email")?.toString().trim() || "";
+        const message = formData.get("message")?.toString().trim() || "";
+
+        // 1. Sauvegarder dans PocketBase
+        await fetch(`${PB_URL}/api/collections/contacts/records`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                firstname: prenom,
+                lastname: nom,
+                email,
+                message,
+            }),
+        });
+
+        // 2. Envoyer l'email via Brevo
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": BREVO_API_KEY,
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: "Portfolio Contact",
+                    email: "camille.norrito@edu.univ-fcomte.fr",
+                },
+                to: [
+                    {
+                        email: "camille.norrito@edu.univ-fcomte.fr",
+                        name: "Camille Norrito",
+                    },
+                ],
+                replyTo: { email: email, name: `${prenom} ${nom}` },
+                subject: `Nouveau message de ${prenom} ${nom}`,
+                htmlContent: `
+                    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;">
+                        <h2 style="color:#261F1C;margin-bottom:1rem;">Nouveau message depuis ton portfolio</h2>
+                        <p><strong>Nom :</strong> ${prenom} ${nom}</p>
+                        <p><strong>Email :</strong> <a href="mailto:${email}">${email}</a></p>
+                        <hr style="border:none;border-top:1px solid #eee;margin:1.5rem 0;" />
+                        <p><strong>Message :</strong></p>
+                        <p style="white-space:pre-wrap;color:#444;">${message}</p>
+                    </div>
+                `,
+            }),
+        });
+
+        formSent = true;
+    } catch (e) {
+        console.error("Erreur envoi contact:", e);
+        formError = true;
+    }
+}
+---
+
+<Layout title="Contact - Camille Norrito">
+    <Header />
+
+    <main class="bg-white">
+        <div class="pt-28 md:pt-32">
+            <div
+                class="flex flex-col lg:flex-row min-h-[600px] px-10 md:px-16 lg:px-20 pb-24"
+            >
+                <!-- Colonne gauche -->
+                <div
+                    class="flex flex-col justify-between lg:w-1/2 pr-10 lg:pr-16 pb-16 lg:pb-0"
+                >
+                    <h5
+                        class="text-[#261F1C] uppercase"
+                        style="font-family:'Montserrat';font-size:90px;font-weight:400;line-height:85%;"
+                    >
+                        CONTACTEZ<br />MOI
+                    </h5>
+                    <div class="mt-auto pt-12">
+                        <a
+                            href="tel:+33768639449"
+                            class="text-brown hover:text-red transition-colors block"
+                            style="font-family:'Montserrat';font-size:25px;font-weight:600;"
+                        >
+                            +(33) 7 68 63 94 49
+                        </a>
+                        <a
+                            href="mailto:camille.norrito@edu.univ-fcomte.fr"
+                            class="text-brown hover:text-red transition-colors block"
+                            style="font-family:'Montserrat';font-size:25px;font-weight:600;"
+                        >
+                            camille.norrito@edu.univ-fcomte.fr
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Séparateur vertical -->
+                <div class="hidden lg:block w-px bg-[#261F1C] flex-shrink-0">
+                </div>
+
+                <!-- Colonne droite : formulaire -->
+                <div
+                    class="lg:w-1/2 pl-10 lg:pl-16 flex flex-col justify-center"
+                >
+                    {
+                        formSent && (
+                            <div style="font-family:'Montserrat';font-size:13px;color:#2d7a2d;letter-spacing:0.05em;margin-bottom:1.5rem;padding:1rem;border:1px solid #2d7a2d;border-radius:4px;">
+                                ✓ Message envoyé ! Je vous répondrai très vite.
+                            </div>
+                        )
+                    }
+
+                    {
+                        formError && (
+                            <div style="font-family:'Montserrat';font-size:13px;color:#B50D0B;letter-spacing:0.05em;margin-bottom:1.5rem;padding:1rem;border:1px solid #B50D0B;border-radius:4px;">
+                                Une erreur s'est produite. Réessayez ou
+                                contactez-moi directement.
+                            </div>
+                        )
+                    }
+
+                    {
+                        !formSent && (
+                            <>
+                                <p
+                                    class="text-content font-semibold text-brown uppercase tracking-widest mb-4"
+                                    style="font-size:13px;letter-spacing:0.08em;"
+                                >
+                                    NOM (obligatoire)
+                                </p>
+
+                                <form method="POST" class="space-y-6 w-full">
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <input
+                                            type="text"
+                                            name="prenom"
+                                            placeholder="Prénom"
+                                            required
+                                            class="bg-transparent border-b border-[#261F1C] text-content text-brown placeholder-[#261F1C]/50 py-2 focus:outline-none focus:border-[#B50D0B] transition-colors"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="nom"
+                                            placeholder="Nom"
+                                            required
+                                            class="bg-transparent border-b border-[#261F1C] text-content text-brown placeholder-[#261F1C]/50 py-2 focus:outline-none focus:border-[#B50D0B] transition-colors"
+                                        />
+                                    </div>
+
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        required
+                                        class="w-full bg-transparent border-b border-[#261F1C] text-content text-brown placeholder-[#261F1C]/50 py-2 focus:outline-none focus:border-[#B50D0B] transition-colors"
+                                    />
+
+                                    <textarea
+                                        name="message"
+                                        placeholder="Message"
+                                        rows="3"
+                                        required
+                                        class="w-full bg-transparent border-b border-[#261F1C] text-content text-brown placeholder-[#261F1C]/50 py-2 focus:outline-none focus:border-[#B50D0B] transition-colors resize-none"
+                                    />
+
+                                    <div class="pt-4">
+                                        <button
+                                            type="submit"
+                                            class="bg-[#261F1C] text-white px-6 py-3 rounded-full hover:bg-[#B50D0B] transition-colors duration-300 uppercase cursor-pointer"
+                                            style="font-family:'Montserrat';font-size:13px;font-weight:600;letter-spacing:0.1em;"
+                                        >
+                                            ENVOYER
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+    </main>
+
+</Layout>

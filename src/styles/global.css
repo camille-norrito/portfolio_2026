@@ -1,0 +1,178 @@
+/* global.css - À placer dans src/styles/ */
+
+/* Import des polices Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* Import de Aboreto depuis Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Aboreto&display=swap');
+
+
+
+@font-face {
+    font-family: 'Horizon';
+    src: url('/fonts/horizon.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Against';
+    src: url('/fonts/against%20regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* =====================
+   TYPOGRAPHIE DESKTOP
+   ===================== */
+
+h1 {
+    font-family: 'Horizon';
+    font-weight: 700;
+    font-size: 55px;
+}
+
+h2 {
+    font-family: 'Montserrat';
+    font-weight: 400;
+    font-size: 38px;
+}
+
+h3 {
+    font-family: 'Montserrat';
+    font-weight: 400;
+    font-size: 128px;
+    line-height: 85%;
+}
+
+h4 {
+    font-family: 'Horizon';
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.text-dossier {
+    font-family: 'Montserrat';
+    font-size: 17px;
+    line-height: 20.7px;
+}
+
+.menu-desktop {
+    font-family: 'Aboreto';
+    font-size: 60px;
+    letter-spacing: -0.09em;
+    line-height: 69.6px;
+}
+
+.text-content {
+    font-family: 'Montserrat';
+    font-size: 18px;
+    letter-spacing: 0.03em;
+    line-height: 21.9px;
+}
+
+.footer-title {
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 21.9px;
+}
+
+.numero-1 {
+    font-family: 'Against';
+    font-size: 300px;
+    letter-spacing: 0.03em;
+}
+
+.numero-2 {
+    font-family: 'Against';
+    font-size: 129px;
+    letter-spacing: 0.03em;
+}
+
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 22px;
+        line-height: 25.3px;
+    }
+
+    .menu-mobile {
+        font-family: 'Aboreto';
+        font-size: 43px;
+        line-height: 49.9px;
+    }
+
+    .h2-mobile {
+        font-family: 'Aboreto';
+        font-size: 17px;
+        line-height: 19.7px;
+    }
+
+    .h3-mobile {
+        font-family: 'Montserrat';
+        font-size: 35px;
+        line-height: 85%;
+    }
+
+    .text-content-mobile {
+        font-family: 'Montserrat';
+        font-size: 11px;
+        line-height: 13.4px;
+        letter-spacing: 0.03em;
+    }
+}
+
+
+/* ============================================
+   STYLES DE BASE AVEC VOS COULEURS
+   ============================================ */
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: #000000;
+    background-color: #FFFFFF;
+}
+
+/* Classes utilitaires personnalisées */
+.text-beige {
+    color: #F1EEEB;
+}
+
+.bg-white {
+    background-color: #FFFFFF;
+}
+
+.text-brown {
+    color: #261F1C;
+}
+
+.bg-brown {
+    background-color: #261F1C;
+}
+
+.text-dark-gray {
+    color: #3A3333;
+}
+
+.bg-dark-gray {
+    background-color: #3A3333;
+}
+
+.text-red {
+    color: #B50D0B;
+}
+
+.bg-red {
+    background-color: #B50D0B;
+}
+
+.text-yellow {
+    color: #F6E033;
+}
+
+.bg-black {
+    background-color: #000000;
+}

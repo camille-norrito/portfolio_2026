@@ -1,3 +1,236 @@
-<footer class="relative mt-2 bottom-0 w-full bg-gray-800 text-white p-4">
-    <p class="">© 2021, Built with Astro</p>
-</footer>
+---
+import Icon_behance from "../assets/icons/Icon_behance.svg";
+import Icon_insta from "../assets/icons/Icon_insta.svg";
+import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
+---
+
+<style>
+    :global(body) {
+        overflow-x: hidden;
+    }
+
+    :global(main) {
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    :global(.footer-sticky-wrapper) {
+        position: sticky;
+        bottom: 0;
+        z-index: 0;
+    }
+</style>
+
+<div class="footer-sticky-wrapper">
+    <div class="w-full border-t border-black"></div>
+
+    <footer class="relative w-full bg-black overflow-hidden">
+        <div class="max-w-7xl mx-auto py-12 md:py-16 px-6 md:px-16">
+            <div
+                class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16"
+            >
+                <!-- COLONNE 1 : MES PROJETS -->
+                <div class="text-center md:text-left">
+                    <a
+                        href="/projets"
+                        class="footer-title mb-4 md:mb-6 text-white hover:text-red transition-colors block"
+                    >
+                        MES PROJETS
+                    </a>
+                    <ul class="space-y-2 md:space-y-3">
+                        <li>
+                            <a
+                                href="/projets"
+                                class="text-content text-white hover:text-red transition-colors block"
+                                data-filter-cat="Conception graphique"
+                            >
+                                Affiche
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/projets"
+                                class="text-content text-white hover:text-red transition-colors block"
+                                data-filter-cat="Identité visuelle"
+                            >
+                                Identité visuelle
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/projets"
+                                class="text-content text-white hover:text-red transition-colors block"
+                                data-filter-cat="Conception de jeu"
+                            >
+                                Jeu vidéo
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/projets"
+                                class="text-content text-white hover:text-red transition-colors block"
+                                data-filter-cat="UX/UI"
+                            >
+                                UX/UI
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/projets"
+                                class="text-content text-white hover:text-red transition-colors block"
+                                data-filter-cat="Production audiovisuelle"
+                            >
+                                Audiovisuel
+                            </a>
+                        </li>
+                        <!-- Téléphone -->
+                        <li class="pt-[15px]">
+                            <a
+                                href="tel:+33768639449"
+                                class="footer-title text-white hover:text-red transition-colors block"
+                            >
+                                +(33) 7 68 63 94 49
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- COLONNE 2 : FOLLOW ME ON -->
+                <div class="flex flex-col items-center">
+                    <p class="footer-title mb-1 md:mb-2 text-white text-center">
+                        FOLLOW
+                    </p>
+                    <p class="text-content text-white mb-4 md:mb-6 text-center">
+                        ME ON
+                    </p>
+                    <div
+                        class="flex gap-5 md:gap-6 items-center justify-center"
+                    >
+                        <a
+                            href="https://instagram.com/votre_compte"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="hover:opacity-70 transition-opacity"
+                            aria-label="Instagram"
+                        >
+                            <img
+                                src={Icon_insta.src}
+                                alt="Instagram"
+                                class="w-8 h-8 md:w-8 md:h-8 invert"
+                            />
+                        </a>
+                        <a
+                            href="https://behance.net/votre_compte"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="hover:opacity-70 transition-opacity"
+                            aria-label="Behance"
+                        >
+                            <img
+                                src={Icon_behance.src}
+                                alt="Behance"
+                                class="w-8 h-8 md:w-8 md:h-8 invert"
+                            />
+                        </a>
+                        <a
+                            href="https://linkedin.com/in/votre_compte"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="hover:opacity-70 transition-opacity"
+                            aria-label="LinkedIn"
+                        >
+                            <img
+                                src={Icon_linkedin.src}
+                                alt="LinkedIn"
+                                class="w-8 h-8 md:w-8 md:h-8 invert"
+                            />
+                        </a>
+                    </div>
+                </div>
+
+                <!-- COLONNE 3 : RESSOURCES -->
+                <div class="text-center md:text-right">
+                    <p class="footer-title mb-4 md:mb-6 text-white">
+                        RESSOURCES
+                    </p>
+                    <ul class="space-y-2 md:space-y-3">
+                        <li>
+                            <a
+                                href="/mentions-legales#politique-confidentialite"
+                                class="text-content text-white hover:text-red transition-colors block"
+                            >
+                                Politique de Confidentialité
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/a-propos"
+                                class="text-content text-white hover:text-red transition-colors block"
+                            >
+                                À propos
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/contact"
+                                class="text-content text-white hover:text-red transition-colors block"
+                            >
+                                Contact
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/mentions-legales"
+                                class="text-content text-white hover:text-red transition-colors block"
+                            >
+                                Mentions Légales
+                            </a>
+                        </li>
+                        <!-- Email -->
+                        <li class="pt-[15px]">
+                            <a
+                                href="mailto:bacalacamille@icloud.com"
+                                class="footer-title text-white hover:text-red transition-colors block"
+                            >
+                                bacalacamille@icloud.com
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="flex justify-end items-center relative z-10 mb-[12vw] md:mb-[7.3vw]"
+        >
+            <p class="text-white font-montserrat text-[30px] leading-[2px]">
+                PORTFOLIO.
+            </p>
+        </div>
+
+        <!-- TEXTE GÉANT EN BAS -->
+        <div
+            class="absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none"
+        >
+            <h1
+                class="whitespace-nowrap font-horizon text-white text-[12vw] md:text-[7.3vw] leading-none tracking-tight"
+                style="transform: translateY(10%);"
+            >
+                CAMILLE NORRITO
+            </h1>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // Liens de filtre du footer : stocke la catégorie voulue avant navigation
+    document.querySelectorAll("[data-filter-cat]").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            e.preventDefault();
+            var cat = (el as HTMLElement).getAttribute("data-filter-cat") || "";
+            sessionStorage.setItem("footer-filter-cat", cat);
+            window.location.href = "/projets";
+        });
+    });
+</script>

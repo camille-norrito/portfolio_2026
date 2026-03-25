@@ -1,0 +1,391 @@
+---
+// src/pages/projets/[slug].astro
+import Layout from "../../layouts/Layout.astro";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const PB_URL = "http://127.0.0.1:8090";
+
+let projet = null;
+try {
+    const res  = await fetch(`${PB_URL}/api/collections/projects/records?filter=(slug='${slug}')&perPage=1`);
+    const data = await res.json();
+    if (data.items && data.items.length > 0) {
+        const p = data.items[0];
+        projet = {
+            title:         p.title,
+            subtitle:      p.subtitle || null,
+            description:   p.description || null,
+            intention:     p.intention || null,
+            recherches:    p.recherches || null,
+            conception:    p.conception || null,
+            critiques:     p.critiques || null,
+            category:      Array.isArray(p.category) ? p.category : [p.category].filter(Boolean),
+            competences:   Array.isArray(p.competences) ? p.competences : [],
+            hasDetailPage: p.has_detail_page,
+            externalLink:  p.external_link || null,
+            coverUrl:      p.cover ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.cover}` : null,
+            heroImages:    Array.isArray(p.hero_images) ? p.hero_images.map((f: string) => `${PB_URL}/api/files/${p.collectionId}/${p.id}/${f}`) : [],
+            planches:      Array.isArray(p.planches) ? p.planches.map((f: string) => `${PB_URL}/api/files/${p.collectionId}/${p.id}/${f}`) : [],
+        };
+    }
+} catch (e) { console.error(e); }
+
+if (!projet) return Astro.redirect("/projets");
+
+let nextProjet = null;
+try {
+    const allRes  = await fetch(`${PB_URL}/api/collections/projects/records?sort=order&perPage=50`);
+    const allData = await allRes.json();
+    const all = allData.items || [];
+    const idx = all.findIndex((p: any) => p.slug === slug);
+    if (idx !== -1) {
+        const nextP = all[idx + 1] || all[0];
+        nextProjet = { title: nextP.title, slug: nextP.slug };
+    }
+} catch (e) {}
+
+function getYoutubeId(url: string): string | null {
+    if (!url) return null;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+}
+
+const youtubeId = projet.externalLink ? getYoutubeId(projet.externalLink) : null;
+
+const sections = [
+    { key: "intention",  label: "Mon intention", content: projet.intention },
+    { key: "recherches", label: "Recherches",     content: projet.recherches },
+    { key: "conception", label: "Conception",     content: projet.conception },
+    { key: "critiques",  label: "Prise de recul", content: projet.critiques },
+].filter(s => s.content);
+---
+
+<Layout title={`${projet.title} — Camille Norrito`}>
+<main style="display:flex;background:#fff;position:relative;">
+
+    <!-- ═══════════ GAUCHE fixe (commune aux deux) ═══════════ -->
+    <div id="proj-left" style="position:fixed;top:0;left:0;width:52%;height:100vh;padding:3.5rem 4rem 3rem;display:flex;flex-direction:column;overflow-y:auto;z-index:2;background:#fff;opacity:0;transform:translateX(-20px);transition:opacity 0.8s ease,transform 0.8s ease;">
+
+        <a href="/projets" class="back-link" style="display:inline-flex;align-items:center;gap:0.6rem;font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(38,31,28,0.35);text-decoration:none;transition:color 0.2s;margin-bottom:3rem;">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7-7"></path></svg>
+            Retour
+        </a>
+
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem;">
+            {projet.category.map((cat: string) => (
+                <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#B50D0B;text-transform:uppercase;border:1px solid rgba(181,13,11,0.3);padding:3px 8px;">{cat}</span>
+            ))}
+        </div>
+
+        <h1 style="font-family:'Horizon';font-size:clamp(32px,4.5vw,62px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:0.6rem;">{projet.title}</h1>
+        {projet.subtitle && <p style="font-family:'Montserrat';font-size:11px;letter-spacing:0.12em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin-bottom:1.75rem;">{projet.subtitle}</p>}
+        <div style="width:32px;height:1px;background:#B50D0B;margin-bottom:1.75rem;"></div>
+        {projet.description && <p style="font-family:'Montserrat';font-size:12px;line-height:1.9;color:rgba(38,31,28,0.6);margin-bottom:2rem;">{projet.description}</p>}
+
+        <!-- ── VERSION AVEC DÉTAILS : tabs ── -->
+        {projet.hasDetailPage && sections.length > 0 && (
+            <div style="display:flex;flex-direction:column;">
+                <div style="display:flex;gap:0;border-bottom:1px solid rgba(38,31,28,0.1);margin-bottom:1.5rem;flex-shrink:0;overflow-x:auto;">
+                    {sections.map((s, i) => (
+                        <button class="tab-btn" data-tab={i} style={`font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid ${i===0?'#B50D0B':'transparent'};padding:0.6rem 0.9rem;cursor:pointer;color:${i===0?'#261F1C':'rgba(38,31,28,0.35)'};transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;`}>
+                            {s.label}
+                        </button>
+                    ))}
+                </div>
+                <div style="padding-right:0.5rem;">
+                    {sections.map((s, i) => (
+                        <div class="tab-content" data-tab={i} style={`display:${i===0?'block':'none'};`}>
+                            <p style="font-family:'Montserrat';font-size:12px;line-height:1.95;color:rgba(38,31,28,0.65);">{s.content}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        <!-- ── VERSION SANS DÉTAILS : compétences en liste ── -->
+        {!projet.hasDetailPage && projet.competences.length > 0 && (
+            <div style="margin-bottom:2.5rem;">
+                <p style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.25em;color:rgba(38,31,28,0.3);text-transform:uppercase;margin-bottom:1rem;">Compétences</p>
+                <div style="display:flex;flex-direction:column;">
+                    {projet.competences.map((comp: string, i: number) => (
+                        <div class="comp-item" style={`display:flex;align-items:center;gap:1rem;padding:0.6rem 0;border-bottom:1px solid rgba(38,31,28,0.07);opacity:0;transform:translateX(-10px);transition:opacity 0.5s ${i*0.07}s ease,transform 0.5s ${i*0.07}s ease;`}>
+                            <div style="width:3px;height:3px;border-radius:50%;background:#B50D0B;flex-shrink:0;"></div>
+                            <span style="font-family:'Montserrat';font-size:11px;letter-spacing:0.08em;color:#261F1C;">{comp}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        <!-- ── VERSION AVEC DÉTAILS : compétences en chips ── -->
+        {projet.hasDetailPage && projet.competences.length > 0 && (
+            <div style="margin-top:1.5rem;flex-shrink:0;">
+                <p style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.25em;color:rgba(38,31,28,0.3);text-transform:uppercase;margin-bottom:0.75rem;">Compétences</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                    {projet.competences.map((comp: string) => (
+                        <span style="font-family:'Montserrat';font-size:9px;letter-spacing:0.08em;color:#261F1C;border:1px solid rgba(38,31,28,0.15);padding:3px 8px;">{comp}</span>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        <div style="flex:1;"></div>
+
+        <!-- CTA + bouton suivant (communs) -->
+        <div style="flex-shrink:0;margin-top:1.5rem;">
+            {projet.externalLink && !youtubeId && (
+                <a href={projet.externalLink} target="_blank" rel="noopener noreferrer" class="cta-btn" style="display:inline-flex;align-items:center;gap:0.75rem;font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#fff;background:#261F1C;padding:12px 22px;border-radius:30px;text-decoration:none;width:fit-content;transition:background 0.3s;margin-bottom:1.5rem;">
+                    Voir le projet
+                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                </a>
+            )}
+            {nextProjet && (
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
+                    <p style="font-family:'Montserrat';font-size:8px;font-weight:700;letter-spacing:0.25em;color:#261F1C;text-transform:uppercase;margin:0;">PROJET</p>
+                    <p style="font-family:'Montserrat';font-size:8px;letter-spacing:0.18em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin:0;">{nextProjet.title}</p>
+                    <a href={"/projets/" + nextProjet.slug} class="next-btn" aria-label="Projet suivant">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                    </a>
+                </div>
+            )}
+        </div>
+    </div>
+
+    <!-- Séparateur -->
+    <div id="proj-divider" style="position:fixed;top:0;left:52%;width:1px;height:100vh;background:rgba(38,31,28,0.08);z-index:3;transform:scaleY(0);transform-origin:top;transition:transform 0.8s 0.3s cubic-bezier(0.16,1,0.3,1);"></div>
+    <div style="flex:0 0 52%;"></div>
+
+    <!-- ═══════════ DROITE scrollable ═══════════ -->
+    <div id="proj-right" style="flex:1;opacity:0;transition:opacity 0.8s 0.2s ease;">
+
+        {projet.hasDetailPage ? (
+            <!-- ── DROITE AVEC DÉTAILS ── -->
+            <div>
+                <!-- 1. Slideshow hero_images -->
+                {projet.heroImages.length > 0 && (
+                    <div id="hero-slideshow" style="position:relative;width:100%;height:100vh;overflow:hidden;background:#f5f0ea;">
+                        {projet.heroImages.map((url: string, i: number) => (
+                            <img src={url} alt="" class="slide-img" data-slide={i}
+                                style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:${i===0?'1':'0'};transition:opacity 0.8s ease;`} />
+                        ))}
+                        {projet.heroImages.length > 1 && (
+                            <div style="position:absolute;bottom:1.5rem;right:1.5rem;display:flex;gap:6px;z-index:5;">
+                                {projet.heroImages.map((_: string, i: number) => (
+                                    <div class="slide-dot" data-slide={i} style={`width:${i===0?'20px':'6px'};height:6px;border-radius:3px;background:${i===0?'white':'rgba(255,255,255,0.4)'};cursor:pointer;transition:all 0.3s;`}></div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <!-- Textes supprimés de droite — ils sont dans les tabs à gauche -->
+
+                <!-- 3. Planches moodboard -->
+                {projet.planches.length > 0 && (
+                    <div style="display:flex;flex-direction:column;gap:0;">
+                        {projet.planches.map((url: string) => (
+                            <div class="planche-item" style="width:100%;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;">
+                                <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        ) : (
+            <!-- ── DROITE SANS DÉTAILS ── -->
+            <div>
+                {youtubeId ? (
+                    <div class="yt-trigger" style="position:relative;width:100%;height:100vh;cursor:pointer;overflow:hidden;background:#000;">
+                        <img src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`} alt={projet.title}
+                            class="yt-thumb-img" style="width:100%;height:100%;object-fit:cover;opacity:0.7;transition:opacity 0.3s;" />
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                            <div class="play-btn" style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;transition:background 0.3s;">
+                                <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                            </div>
+                        </div>
+                        <div id="yt-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:100;align-items:center;justify-content:center;">
+                            <button id="yt-close" style="position:absolute;top:2rem;right:2rem;background:none;border:none;color:white;cursor:pointer;font-size:1.5rem;">✕</button>
+                            <iframe id="yt-iframe" src="" data-src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+                                title={projet.title} frameborder="0" allow="autoplay;encrypted-media" allowfullscreen
+                                style="width:80vw;height:45vw;max-height:80vh;border:none;"></iframe>
+                        </div>
+                    </div>
+                ) : projet.planches.length > 0 ? (
+                    <div style="display:flex;flex-direction:column;gap:0;">
+                        {projet.planches.map((url: string) => (
+                            <div class="planche-item" style="width:100%;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;">
+                                <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />
+                            </div>
+                        ))}
+                    </div>
+                ) : projet.coverUrl ? (
+                    <div style="height:100vh;overflow:hidden;">
+                        <img src={projet.coverUrl} alt={projet.title} style="width:100%;height:100%;object-fit:cover;" />
+                    </div>
+                ) : (
+                    <div style="height:100vh;display:flex;align-items:center;justify-content:center;">
+                        <span style="font-family:'Horizon';font-size:clamp(60px,8vw,100px);color:rgba(38,31,28,0.05);text-transform:uppercase;">{projet.title}</span>
+                    </div>
+                )}
+            </div>
+        )}
+    </div>
+
+</main>
+</Layout>
+
+<style>
+    .back-link:hover { color: #261F1C !important; }
+    .cta-btn:hover   { background: #B50D0B !important; }
+    .next-btn {
+        width: 40px; height: 40px; border-radius: 50%;
+        border: 1.5px solid #261F1C; display: flex;
+        align-items: center; justify-content: center;
+        text-decoration: none; color: #261F1C;
+        transition: background 0.2s, color 0.2s; margin-top: 0.2rem;
+    }
+    .next-btn:hover { background: #261F1C; color: white; }
+    .next-btn:hover svg { stroke: white; }
+    #proj-left::-webkit-scrollbar { width: 0; }
+    #proj-left { scrollbar-width: none; }
+    .tab-btn:hover { color: #261F1C !important; }
+    .tab-scroll::-webkit-scrollbar { width: 0; }
+    .tab-scroll { scrollbar-width: none; }
+</style>
+
+<script>
+(function () {
+    var left    = document.getElementById("proj-left") as HTMLElement | null;
+    var right   = document.getElementById("proj-right") as HTMLElement | null;
+    var divider = document.getElementById("proj-divider") as HTMLElement | null;
+
+    setTimeout(function () {
+        if (left)    { left.style.opacity = "1"; left.style.transform = "translateX(0)"; }
+        if (right)   right.style.opacity = "1";
+        if (divider) divider.style.transform = "scaleY(1)";
+        // Compétences liste
+        document.querySelectorAll(".comp-item").forEach(function (el, i) {
+            setTimeout(function () {
+                (el as HTMLElement).style.opacity   = "1";
+                (el as HTMLElement).style.transform = "translateX(0)";
+            }, 500 + i * 70);
+        });
+    }, 100);
+
+    // ── TABS ──────────────────────────────────
+    var tabBtns     = document.querySelectorAll(".tab-btn");
+    var tabContents = document.querySelectorAll(".tab-content");
+    tabBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var idx = (btn as HTMLElement).getAttribute("data-tab");
+            tabBtns.forEach(function (b) {
+                var el = b as HTMLElement;
+                var active = el.getAttribute("data-tab") === idx;
+                el.style.color        = active ? "#261F1C" : "rgba(38,31,28,0.35)";
+                el.style.borderBottom = active ? "2px solid #B50D0B" : "2px solid transparent";
+            });
+            tabContents.forEach(function (c) {
+                (c as HTMLElement).style.display = (c as HTMLElement).getAttribute("data-tab") === idx ? "block" : "none";
+            });
+        });
+    });
+
+    // ── SLIDESHOW ─────────────────────────────
+    var slides = document.querySelectorAll(".slide-img");
+    var dots   = document.querySelectorAll(".slide-dot");
+    var current = 0;
+    function goTo(n: number) {
+        slides.forEach(function (s, i) { (s as HTMLElement).style.opacity = i === n ? "1" : "0"; });
+        dots.forEach(function (d, i) {
+            var el = d as HTMLElement;
+            el.style.width = i === n ? "20px" : "6px";
+            el.style.background = i === n ? "white" : "rgba(255,255,255,0.4)";
+        });
+        current = n;
+    }
+    dots.forEach(function (d, i) { d.addEventListener("click", function () { goTo(i); }); });
+    if (slides.length > 1) setInterval(function () { goTo((current + 1) % slides.length); }, 3500);
+
+    // ── TEXTE QUI SE COLORE ───────────────────
+    document.querySelectorAll(".scroll-text").forEach(function (el) {
+        new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                var t = entry.target as HTMLElement;
+                if (entry.isIntersecting) {
+                    t.style.color = "rgba(38,31,28,0.72)";
+                } else if (t.getBoundingClientRect().top > window.innerHeight * 0.3) {
+                    t.style.color = "rgba(38,31,28,0.15)";
+                }
+            });
+        }, { threshold: 0.25, rootMargin: "0px 0px -10% 0px" }).observe(el);
+    });
+
+    // ── PLANCHES REVEAL ───────────────────────
+    var obsP = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                (entry.target as HTMLElement).style.opacity   = "1";
+                (entry.target as HTMLElement).style.transform = "translateY(0)";
+                obsP.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll(".planche-item").forEach(function (p) { obsP.observe(p); });
+
+    // ── LIGHTBOX YOUTUBE ──────────────────────
+    var thumb    = document.querySelector(".yt-trigger") as HTMLElement | null;
+    var lightbox = document.getElementById("yt-lightbox") as HTMLElement | null;
+    var closeBtn = document.getElementById("yt-close") as HTMLElement | null;
+    var iframe   = document.getElementById("yt-iframe") as HTMLIFrameElement | null;
+    var thumbImg = document.querySelector(".yt-thumb-img") as HTMLElement | null;
+    var playBtn  = document.querySelector(".play-btn") as HTMLElement | null;
+    if (thumb && lightbox && iframe) {
+        var lb = lightbox, fr = iframe;
+        thumb.addEventListener("mouseenter", function () {
+            if (thumbImg) thumbImg.style.opacity = "0.5";
+            if (playBtn)  playBtn.style.background = "rgba(255,255,255,0.25)";
+        });
+        thumb.addEventListener("mouseleave", function () {
+            if (thumbImg) thumbImg.style.opacity = "0.7";
+            if (playBtn)  playBtn.style.background = "rgba(255,255,255,0.15)";
+        });
+        thumb.addEventListener("click", function () {
+            lb.style.display = "flex";
+            fr.src = fr.getAttribute("data-src") || "";
+            document.body.style.overflow = "hidden";
+        });
+        if (closeBtn) {
+            closeBtn.addEventListener("click", function () {
+                lb.style.display = "none"; fr.src = "";
+                document.body.style.overflow = "";
+            });
+        }
+        lb.addEventListener("click", function (e) {
+            if (e.target === lb) { lb.style.display = "none"; fr.src = ""; document.body.style.overflow = ""; }
+        });
+    }
+
+    // ── STICKY DÉCOLLE ────────────────────────
+    (function () {
+        var lEl = document.getElementById("proj-left") as HTMLElement | null;
+        var rEl = document.getElementById("proj-right") as HTMLElement | null;
+        var mEl = document.querySelector("main") as HTMLElement | null;
+        if (!lEl || !rEl || !mEl) return;
+        var l = lEl, r = rEl, m = mEl;
+        function updateSticky() {
+            if (r.getBoundingClientRect().bottom <= window.innerHeight) {
+                l.style.position = "absolute";
+                l.style.top = (m.offsetHeight - window.innerHeight) + "px";
+            } else {
+                l.style.position = "fixed";
+                l.style.top = "0";
+            }
+        }
+        window.addEventListener("scroll", updateSticky, { passive: true });
+        window.addEventListener("resize", updateSticky);
+        updateSticky();
+    })();
+})();
+</script>

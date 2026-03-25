@@ -1,11 +1,35 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import FloatingGallery from "../components/FloatingGallery.astro";
+import ProjectsDeck from "../components/ProjectsDeck.astro";
+import AboutSnippet from "../components/AboutSnippet.astro";
+import StackedProjects from "../components/StackedProjects.astro";
+import GalleryScroll from "../components/GalleryScroll.astro";
+import ProjectsIntro from "../components/ProjectsIntro.astro";
+import LoadingAnimation from "../components/LoadingAnimation.astro";
+import ContactSnippet from "../components/ContactSnippet.astro";
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
----
+<Layout title="Camille Norrito - Portfolio">
+	<LoadingAnimation />
 
-<Layout>
-	<Welcome name="Prenom" />
+	<Hero />
+	<FloatingGallery />
+	<div style="background:#fff;height:20vh;"></div>
+
+	<!-- Stack de sections qui se superposent au scroll -->
+	<div style="position:relative;">
+		<ProjectsIntro />
+		<StackedProjects />
+	</div>
+
+	<ProjectsDeck />
+	<GalleryScroll />
+	<ContactSnippet />
+
+
+	<!-- Section blanche de transition -->
+	<div style="background:#fff;height:20vh;"></div>
 </Layout>

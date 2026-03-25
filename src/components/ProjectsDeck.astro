@@ -1,0 +1,141 @@
+---
+// src/components/ProjectsDeck.astro
+const PB_URL = "http://127.0.0.1:8090";
+
+let projets = [];
+try {
+    const res = await fetch(
+        `${PB_URL}/api/collections/projects/records?filter=(category~'Conception graphique')&sort=order&perPage=50`,
+    );
+    const data = await res.json();
+    projets = data.items.map((p: any) => ({
+        title: p.title,
+        slug: p.slug,
+        coverUrl: p.cover
+            ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.cover}`
+            : null,
+    }));
+} catch (e) {
+    console.error("Erreur fetch projets affiches:", e);
+}
+
+const count = String(projets.length).padStart(2, "0");
+---
+
+<!-- Wrapper scrollable — donne de la hauteur pour l'animation -->
+<div id="affiches-wrapper" style="position:relative;height:250vh;">
+    <div
+        id="affiches-section"
+        style="position:sticky;top:0;height:100vh;background:#000;display:flex;flex-direction:column;overflow:hidden;"
+    >
+        <!-- ZONE PHOTOS -->
+        <div style="flex:1;min-height:0;position:relative;overflow:hidden;">
+            <!-- TRACK qui slide horizontalement -->
+            <div
+                id="affiches-track"
+                style="
+                    display:flex;
+                    align-items:center;
+                    height:100%;
+                    gap:5rem;
+                    padding:0 8rem;
+                    will-change:transform;
+                    transform:translateX(100vw);
+                    transition:none;
+                "
+            >
+                {
+                    projets.map((p: any) => (
+                        <a
+                            href={"/projets/" + p.slug}
+                            class="affiche-card"
+                            style="flex-shrink:0;text-decoration:none;display:flex;flex-direction:column;gap:1rem;"
+                        >
+                            <div style="overflow:hidden;width:clamp(180px,22vw,300px);height:clamp(240px,30vw,420px);">
+                                <img
+                                    src={p.coverUrl || ""}
+                                    alt={p.title}
+                                    style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;"
+                                    class="affiche-img"
+                                />
+                            </div>
+                            <p style="font-family:'Montserrat';font-size:clamp(9px,0.9vw,11px);font-weight:700;letter-spacing:0.18em;color:white;text-transform:uppercase;text-align:center;">
+                                {p.title}
+                            </p>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- BANDEAU BAS -->
+        <div
+            style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;padding:0.85rem 3.5rem;gap:1.5rem;background:#000;"
+        >
+            <span
+                class="numero-2 leading-none"
+                style="color:white;font-family:'Against';">{count}</span
+            >
+            <a
+                href="/projets"
+                style="font-family:'Montserrat';font-size:clamp(60px,10vw,100px);letter-spacing:0.02em;line-height:1;color:white;text-transform:uppercase;flex:1;text-align:right;text-decoration:none;transition:color 0.3s;"
+                class="affiches-title-link"
+            >
+                AFFICHES
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .affiche-card:hover .affiche-img {
+        transform: scale(1.04);
+    }
+    .affiches-title-link:hover {
+        color: #b50d0b !important;
+    }
+</style>
+
+<script>
+    (function () {
+        var wrapperEl = document.getElementById(
+            "affiches-wrapper",
+        ) as HTMLElement | null;
+        var trackEl = document.getElementById(
+            "affiches-track",
+        ) as HTMLElement | null;
+
+        if (!wrapperEl || !trackEl) return;
+
+        var w = wrapperEl;
+        var t = trackEl;
+
+        function update() {
+            var rect = w.getBoundingClientRect();
+            var scrolled = -rect.top;
+            var total = w.offsetHeight - window.innerHeight;
+            if (total <= 0) return;
+
+            var progress = Math.min(1, Math.max(0, scrolled / total));
+            // Ease out quadratique : ralentit en arrivant
+            var eased = 1 - Math.pow(1 - progress, 2);
+
+            var trackW = t.scrollWidth;
+            var winW = window.innerWidth;
+            // Centrer la carte du milieu (index 1 sur 3)
+            // La carte du milieu commence à trackW/3 depuis la gauche du track
+            // On veut que son centre soit au centre de l'écran
+            var cardW = trackW / 3;
+            var finalX = winW / 2 - cardW * 1.5;
+            // Départ hors écran droite
+            var startX = winW + 100;
+            var currentX = startX + (finalX - startX) * eased;
+            t.style.transform = "translateX(" + currentX + "px)";
+            t.style.transition = "none";
+        }
+
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        update();
+    })();
+</script>
