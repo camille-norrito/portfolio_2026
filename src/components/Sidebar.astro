@@ -1,0 +1,462 @@
+---
+// src/components/Sidebar.astro
+import { projets, categories as projetCategories } from "../data/projets";
+import { galleries } from "../data/galleries";
+
+const categories = [
+    { label: "Tous", key: "tous", match: [""] },
+    ...projetCategories,
+];
+
+const cards = projets.map((p) => ({
+    title: p.title.trim(),
+    slug: p.slug,
+    cover: p.cover,
+    subtitle: p.subtitle || p.category[0] || "",
+    cats: categories
+        .filter((c) => p.category.some((cat) => c.match.some((m) => cat.includes(m))))
+        .map((c) => c.key)
+        .join(" "),
+}));
+---
+
+<nav id="sidebar" aria-label="Navigation principale">
+    <a href="/" class="sb-item" data-path="/">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.5 2.5 10v10.5a1 1 0 0 0 1 1H9v-6.5h6v6.5h5.5a1 1 0 0 0 1-1V10z"></path>
+        </svg>
+        <span>Accueil</span>
+    </a>
+
+    <button type="button" class="sb-item sb-toggle" data-path="/projets" aria-expanded="false" aria-controls="sb-panel-projets">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="2.5" width="12" height="2.5" rx="1.25"></rect>
+            <rect x="4" y="6.5" width="16" height="2.5" rx="1.25"></rect>
+            <rect x="2.5" y="10.5" width="19" height="11" rx="3"></rect>
+        </svg>
+        <span>Projets</span>
+    </button>
+
+    <button type="button" class="sb-item sb-toggle" data-path="/gallery" aria-expanded="false" aria-controls="sb-panel-galerie">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3.5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 18.5h14l-4.5-6-3.5 4.5-2.5-3z"></path>
+        </svg>
+        <span>Galerie</span>
+    </button>
+
+    <a href="/cv.pdf" download="CV_Camille_Norrito_Stage_2027.pdf" class="sb-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5zM11 11v5.17l-2.09-2.08-1.41 1.41L12 20l4.5-4.5-1.41-1.41L13 16.17V11z"></path>
+        </svg>
+        <span>CV</span>
+    </a>
+
+    <a href="/contact" class="sb-item" data-path="/contact">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 4h16a2 2 0 0 1 2 2v.4l-10 6.25L2 6.4V6a2 2 0 0 1 2-2zm-2 4.75 10 6.25 10-6.25V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"></path>
+        </svg>
+        <span>Contact</span>
+    </a>
+</nav>
+
+<!-- PANNEAU PROJETS -->
+<div id="sb-panel-projets" class="sb-panel" role="dialog" aria-label="Projets" aria-hidden="true">
+    <div class="sb-panel-head">
+        <span class="sb-panel-title">Projets</span>
+        <a href="/projets" class="sb-panel-all">
+            Tout
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+    </div>
+
+    <div class="sb-tabs" role="tablist">
+        {categories.map((c, i) => (
+            <button type="button" role="tab" class="sb-tab" data-cat={c.key} aria-selected={i === 0 ? "true" : "false"}>
+                {c.label}
+            </button>
+        ))}
+    </div>
+
+    <div class="sb-grid">
+        {cards.map((p) => (
+            <a href={"/projets/" + p.slug} class="sb-card" data-cats={p.cats}>
+                <div class="sb-card-img">
+                    {p.cover && <img src={p.cover} alt={p.title} loading="lazy" />}
+                </div>
+                <p class="sb-card-title">{p.title}</p>
+                {p.subtitle && <p class="sb-card-sub">{p.subtitle}</p>}
+            </a>
+        ))}
+    </div>
+</div>
+
+<!-- PANNEAU GALERIE -->
+<div id="sb-panel-galerie" class="sb-panel" role="dialog" aria-label="Galerie" aria-hidden="true">
+    <div class="sb-panel-head">
+        <span class="sb-panel-title">Galerie</span>
+        <a href="/projets#galerie" class="sb-panel-all">
+            Tout
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+    </div>
+
+    <div class="sb-grid">
+        {galleries.map((g) => (
+            <a href={"/gallery/" + g.slug} class="sb-card">
+                <div class="sb-card-img">
+                    {(g.cover || g.photos[0]) && <img src={g.cover || g.photos[0]} alt={g.title} loading="lazy" />}
+                </div>
+                <p class="sb-card-title">{g.title}</p>
+                <p class="sb-card-sub">{g.photos.length} photos</p>
+            </a>
+        ))}
+    </div>
+</div>
+
+<style is:global>
+    :root {
+        --sidebar-w: 88px;
+    }
+    body {
+        padding-left: var(--sidebar-w);
+    }
+    @media (max-width: 767px) {
+        :root {
+            --sidebar-w: 0px;
+        }
+        body {
+            padding-bottom: 72px;
+        }
+    }
+
+    /* Barre cachée pendant l'intro de la landing */
+    #sidebar {
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    html.intro-active #sidebar {
+        transform: translateX(-100%);
+    }
+    html.intro-active .sb-panel {
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    @media (max-width: 767px) {
+        html.intro-active #sidebar {
+            transform: translateY(100%);
+        }
+    }
+</style>
+
+<style>
+    /* Couleurs du menu */
+    #sidebar,
+    .sb-panel {
+        --c-bg: #1e1b1f;
+        --c-surface: #2b282c;
+        --c-ink: #f4f2f5;
+        --c-accent: #c3ef5c;
+        color-scheme: dark;
+    }
+
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-w);
+        z-index: 60;
+        background: var(--c-bg);
+        border-right: 1px solid rgba(244, 242, 245, 0.08);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.75rem;
+    }
+
+    .sb-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        width: 72px;
+        padding: 0.6rem 0;
+        border: 1.5px solid transparent;
+        border-radius: 12px;
+        background: none;
+        cursor: pointer;
+        font-family: "Montserrat";
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--c-ink);
+        text-decoration: none;
+        transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .sb-item:hover {
+        color: var(--c-accent);
+    }
+    .sb-item.is-active {
+        color: var(--c-accent);
+    }
+    .sb-item[aria-expanded="true"] {
+        border-color: var(--c-ink);
+        color: var(--c-ink);
+    }
+    .sb-item:focus-visible {
+        outline: 2px solid var(--c-accent);
+        outline-offset: 2px;
+    }
+
+    /* ── Panneau ── */
+    .sb-panel {
+        position: fixed;
+        top: 12px;
+        bottom: 12px;
+        left: calc(var(--sidebar-w) + 12px);
+        width: min(460px, calc(100vw - var(--sidebar-w) - 24px));
+        z-index: 59;
+        background: var(--c-bg);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        padding: 1.5rem;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--c-surface) transparent;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-12px);
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s 0.25s;
+    }
+    .sb-panel.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .sb-panel-head {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+    .sb-panel-title {
+        font-family: "Montserrat";
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--c-ink);
+    }
+    .sb-panel-all {
+        position: absolute;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "Montserrat";
+        font-size: 14px;
+        color: var(--c-ink);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .sb-panel-all:hover {
+        color: var(--c-accent);
+    }
+
+    .sb-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 3px;
+        background: var(--c-surface);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .sb-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    .sb-tab {
+        flex: 1;
+        white-space: nowrap;
+        padding: 0.5rem 0.4rem;
+        border: none;
+        border-radius: 8px;
+        background: none;
+        cursor: pointer;
+        font-family: "Montserrat";
+        font-size: 12px;
+        color: var(--c-ink);
+        transition: background 0.2s;
+    }
+    .sb-tab[aria-selected="true"] {
+        background: var(--c-bg);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .sb-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem 1rem;
+    }
+    .sb-card {
+        text-decoration: none;
+        color: var(--c-ink);
+    }
+    /* Projets hors catégorie */
+    .sb-card {
+        transition: opacity 0.3s ease;
+    }
+    .sb-card .sb-card-img img {
+        transition: transform 0.4s ease, filter 0.3s ease;
+    }
+    .sb-card.is-dim {
+        opacity: 0.35;
+    }
+    .sb-card.is-dim .sb-card-img img {
+        filter: grayscale(1);
+    }
+    .sb-card.is-dim:hover {
+        opacity: 0.7;
+    }
+    .sb-card-img {
+        aspect-ratio: 1 / 1;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--c-surface);
+        margin-bottom: 0.6rem;
+    }
+    .sb-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .sb-card:hover .sb-card-img img {
+        transform: scale(1.04);
+    }
+    .sb-card-title {
+        font-family: "Montserrat";
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .sb-card-sub {
+        font-family: "Montserrat";
+        font-size: 12px;
+        color: rgba(244, 242, 245, 0.5);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Mobile : barre en bas ── */
+    @media (max-width: 767px) {
+        #sidebar {
+            top: auto;
+            right: 0;
+            width: auto;
+            height: 72px;
+            flex-direction: row;
+            justify-content: space-around;
+            gap: 0;
+            border-right: none;
+            border-top: 1px solid rgba(244, 242, 245, 0.08);
+        }
+        .sb-item {
+            padding: 0.4rem 0;
+        }
+        .sb-panel {
+            top: auto;
+            left: 12px;
+            right: 12px;
+            bottom: 84px;
+            width: auto;
+            max-height: 75vh;
+            transform: translateY(12px);
+        }
+        .sb-panel.is-open {
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        var sidebar = document.getElementById("sidebar");
+        var projPanel = document.getElementById("sb-panel-projets");
+        if (!sidebar || !projPanel) return;
+        var sb = sidebar;
+
+        // Page active
+        var path = window.location.pathname;
+        sb.querySelectorAll("[data-path]").forEach(function (el) {
+            var p = el.getAttribute("data-path") || "";
+            if (p === "/" ? path === "/" : path.startsWith(p)) el.classList.add("is-active");
+        });
+
+        // Panneaux
+        var toggles = Array.prototype.slice.call(sb.querySelectorAll(".sb-toggle")) as HTMLElement[];
+        function panelOf(btn: HTMLElement) {
+            return document.getElementById(btn.getAttribute("aria-controls") || "");
+        }
+        function setOpen(btn: HTMLElement, open: boolean) {
+            var pnl = panelOf(btn);
+            if (!pnl) return;
+            pnl.classList.toggle("is-open", open);
+            pnl.setAttribute("aria-hidden", open ? "false" : "true");
+            btn.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+        function openToggle() {
+            return toggles.filter(function (b) { return b.getAttribute("aria-expanded") === "true"; })[0];
+        }
+        toggles.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var wasOpen = btn.getAttribute("aria-expanded") === "true";
+                toggles.forEach(function (b) { setOpen(b, false); });
+                if (!wasOpen) setOpen(btn, true);
+            });
+        });
+        document.addEventListener("click", function (e) {
+            var btn = openToggle();
+            var pnl = btn && panelOf(btn);
+            var t = e.target as Node;
+            if (btn && pnl && !pnl.contains(t) && !btn.contains(t)) setOpen(btn, false);
+            if (btn && pnl && (t as Element).closest && (t as Element).closest(".sb-panel a")) setOpen(btn, false);
+        });
+        document.addEventListener("keydown", function (e) {
+            var btn = openToggle();
+            if (e.key === "Escape" && btn) {
+                setOpen(btn, false);
+                btn.focus();
+            }
+        });
+
+        // Onglets catégories
+        var tabs = projPanel.querySelectorAll(".sb-tab");
+        var grid = projPanel.querySelector(".sb-grid");
+        var cards = Array.prototype.slice.call(projPanel.querySelectorAll(".sb-card")) as HTMLElement[];
+        function selectCat(cat: string) {
+            tabs.forEach(function (t) {
+                t.setAttribute("aria-selected", t.getAttribute("data-cat") === cat ? "true" : "false");
+            });
+            var inCat: HTMLElement[] = [];
+            var others: HTMLElement[] = [];
+            cards.forEach(function (c) {
+                var cats = (c.getAttribute("data-cats") || "").split(" ");
+                var match = cats.indexOf(cat) !== -1;
+                c.classList.toggle("is-dim", !match);
+                (match ? inCat : others).push(c);
+            });
+            if (grid) {
+                var g = grid;
+                inCat.concat(others).forEach(function (c) { g.appendChild(c); });
+            }
+        }
+        tabs.forEach(function (t) {
+            t.addEventListener("click", function () {
+                selectCat(t.getAttribute("data-cat") || "");
+            });
+        });
+        if (tabs[0]) selectCat(tabs[0].getAttribute("data-cat") || "");
+    })();
+</script>
