@@ -310,17 +310,37 @@ const rows = categories
             grid-template-columns: minmax(0, 1fr);
             row-gap: 1.25rem;
         }
+        /* Sur mobile, on garde seulement le titre « Projets » */
         .pj-hero-meta {
-            grid-template-columns: minmax(0, 1fr);
-            gap: 0.75rem;
-            font-size: 14px;
+            display: none;
         }
-        .pj-hero-date {
-            text-align: left;
+        /* Cartes plus petites : deux visibles et le début de la suivante */
+        .pj-track {
+            gap: 0.85rem;
         }
         .pj-card,
         .pj-gal-card {
-            flex-basis: 70vw;
+            flex-basis: 42vw;
+        }
+        .pj-card-img,
+        .pj-gal-card {
+            border-radius: 12px;
+        }
+        .pj-card-img {
+            margin-bottom: 0.6rem;
+        }
+        .pj-card-title {
+            font-size: 13px;
+        }
+        .pj-card-sub {
+            font-size: 11px;
+        }
+        .pj-gal-title {
+            font-size: 17px;
+        }
+        .pj-gal-brand {
+            font-size: 7px;
+            margin-bottom: 0.75rem;
         }
     }
 </style>

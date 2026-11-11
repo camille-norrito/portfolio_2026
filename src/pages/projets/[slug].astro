@@ -25,6 +25,7 @@ const projet = {
     competences:   p.competences,
     hasDetailPage: p.hasDetailPage,
     externalLink:  p.externalLink || null,
+    ctaLabel:      p.ctaLabel || "Voir le projet",
     coverUrl:      p.cover,
     heroImages:    p.heroImages,
     planches:      p.planches,
@@ -32,6 +33,8 @@ const projet = {
 
 const nextP = projets[idx + 1] || projets[0];
 const nextProjet = { title: nextP.title, slug: nextP.slug };
+const prevP = projets[idx - 1] || projets[projets.length - 1];
+const prevProjet = { title: prevP.title, slug: prevP.slug };
 
 function getYoutubeId(url: string): string | null {
     if (!url) return null;
@@ -50,7 +53,7 @@ const sections = [
 ---
 
 <Layout title={`${projet.title} — Camille Norrito`}>
-<main style="display:flex;background:#fff;position:relative;">
+<main class="proj-main" style="display:flex;background:#fff;position:relative;">
 
     <!-- ═══════════ GAUCHE fixe (commune aux deux) ═══════════ -->
     <div id="proj-left" style="position:fixed;top:0;left:var(--sidebar-w);width:calc((100% - var(--sidebar-w)) * 0.52);height:100vh;padding:3.5rem 4rem 3rem;display:flex;flex-direction:column;overflow-y:auto;z-index:2;background:#fff;opacity:0;transform:translateX(-20px);transition:opacity 0.8s ease,transform 0.8s ease;">
@@ -62,13 +65,13 @@ const sections = [
 
         <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem;">
             {projet.category.map((cat: string) => (
-                <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#B50D0B;text-transform:uppercase;border:1px solid rgba(181,13,11,0.3);padding:3px 8px;">{cat}</span>
+                <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#1e1b1f;background:#C3EF5C;text-transform:uppercase;border:1px solid #C3EF5C;padding:3px 8px;">{cat}</span>
             ))}
         </div>
 
         <h1 style="font-family:'Horizon';font-size:clamp(32px,4.5vw,62px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:0.6rem;">{projet.title}</h1>
         {projet.subtitle && <p style="font-family:'Montserrat';font-size:11px;letter-spacing:0.12em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin-bottom:1.75rem;">{projet.subtitle}</p>}
-        <div style="width:32px;height:1px;background:#B50D0B;margin-bottom:1.75rem;"></div>
+        <div style="width:32px;height:1px;background:#C3EF5C;margin-bottom:1.75rem;"></div>
         {projet.description && <p style="font-family:'Montserrat';font-size:12px;line-height:1.9;color:rgba(38,31,28,0.6);margin-bottom:2rem;">{projet.description}</p>}
 
         <!-- ── VERSION AVEC DÉTAILS : tabs ── -->
@@ -76,7 +79,7 @@ const sections = [
             <div style="display:flex;flex-direction:column;">
                 <div style="display:flex;gap:0;border-bottom:1px solid rgba(38,31,28,0.1);margin-bottom:1.5rem;flex-shrink:0;overflow-x:auto;">
                     {sections.map((s, i) => (
-                        <button class="tab-btn" data-tab={i} style={`font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid ${i===0?'#B50D0B':'transparent'};padding:0.6rem 0.9rem;cursor:pointer;color:${i===0?'#261F1C':'rgba(38,31,28,0.35)'};transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;`}>
+                        <button class="tab-btn" data-tab={i} style={`font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid ${i===0?'#C3EF5C':'transparent'};padding:0.6rem 0.9rem;cursor:pointer;color:${i===0?'#261F1C':'rgba(38,31,28,0.35)'};transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;`}>
                             {s.label}
                         </button>
                     ))}
@@ -98,7 +101,7 @@ const sections = [
                 <div style="display:flex;flex-direction:column;">
                     {projet.competences.map((comp: string, i: number) => (
                         <div class="comp-item" style={`display:flex;align-items:center;gap:1rem;padding:0.6rem 0;border-bottom:1px solid rgba(38,31,28,0.07);opacity:0;transform:translateX(-10px);transition:opacity 0.5s ${i*0.07}s ease,transform 0.5s ${i*0.07}s ease;`}>
-                            <div style="width:3px;height:3px;border-radius:50%;background:#B50D0B;flex-shrink:0;"></div>
+                            <div style="width:3px;height:3px;border-radius:50%;background:#C3EF5C;flex-shrink:0;"></div>
                             <span style="font-family:'Montserrat';font-size:11px;letter-spacing:0.08em;color:#261F1C;">{comp}</span>
                         </div>
                     ))}
@@ -124,28 +127,40 @@ const sections = [
         <div style="flex-shrink:0;margin-top:1.5rem;">
             {projet.externalLink && !youtubeId && (
                 <a href={projet.externalLink} target="_blank" rel="noopener noreferrer" class="cta-btn" style="display:inline-flex;align-items:center;gap:0.75rem;font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#fff;background:#261F1C;padding:12px 22px;border-radius:30px;text-decoration:none;width:fit-content;transition:background 0.3s;margin-bottom:1.5rem;">
-                    Voir le projet
+                    {projet.ctaLabel}
                     <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
                 </a>
             )}
-            {nextProjet && (
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
-                    <p style="font-family:'Montserrat';font-size:8px;font-weight:700;letter-spacing:0.25em;color:#261F1C;text-transform:uppercase;margin:0;">PROJET</p>
-                    <p style="font-family:'Montserrat';font-size:8px;letter-spacing:0.18em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin:0;">{nextProjet.title}</p>
-                    <a href={"/projets/" + nextProjet.slug} class="next-btn" aria-label="Projet suivant">
+            <!-- Navigation entre projets : précédent à gauche, suivant à droite -->
+            <div class="proj-nav">
+                <a href={"/projets/" + prevProjet.slug} class="proj-nav-link" aria-label={"Projet précédent : " + prevProjet.title}>
+                    <span class="next-btn">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                    </span>
+                    <span class="proj-nav-text">
+                        <span class="proj-nav-label">Précédent</span>
+                        <span class="proj-nav-title">{prevProjet.title}</span>
+                    </span>
+                </a>
+                <a href={"/projets/" + nextProjet.slug} class="proj-nav-link proj-nav-next" aria-label={"Projet suivant : " + nextProjet.title}>
+                    <span class="proj-nav-text">
+                        <span class="proj-nav-label">Suivant</span>
+                        <span class="proj-nav-title">{nextProjet.title}</span>
+                    </span>
+                    <span class="next-btn">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-                    </a>
-                </div>
-            )}
+                    </span>
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Séparateur -->
     <div id="proj-divider" style="position:fixed;top:0;left:calc(var(--sidebar-w) + (100% - var(--sidebar-w)) * 0.52);width:1px;height:100vh;background:rgba(38,31,28,0.08);z-index:3;transform:scaleY(0);transform-origin:top;transition:transform 0.8s 0.3s cubic-bezier(0.16,1,0.3,1);"></div>
-    <div style="flex:0 0 52%;"></div>
+    <div class="proj-spacer" style="flex:0 0 52%;"></div>
 
     <!-- ═══════════ DROITE scrollable ═══════════ -->
-    <div id="proj-right" style="flex:1;opacity:0;transition:opacity 0.8s 0.2s ease;">
+    <div id="proj-right" style="flex:1;min-height:100vh;opacity:0;transition:opacity 0.8s 0.2s ease;">
 
         {projet.hasDetailPage ? (
             <!-- ── DROITE AVEC DÉTAILS ── -->
@@ -202,7 +217,7 @@ const sections = [
                         </div>
                     </div>
                 ) : projet.planches.length > 0 ? (
-                    <div style="display:flex;flex-direction:column;justify-content:center;gap:0;min-height:100vh;background:#0e0c0b;">
+                    <div class="proj-solo" style="display:flex;flex-direction:column;justify-content:center;gap:0;min-height:100vh;background:#0e0c0b;">
                         {projet.planches.map((url: string) => (
                             <div class="planche-item" style="width:100%;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;">
                                 {url.endsWith(".mp4")
@@ -228,17 +243,77 @@ const sections = [
 </Layout>
 
 <style>
+    /* ── Mobile : texte en pleine largeur, images en dessous ── */
+    @media (max-width: 767px) {
+        .proj-main { flex-direction: column; }
+        #proj-left {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            padding: 2rem 1.25rem 2.5rem !important;
+            overflow: visible !important;
+        }
+        #proj-divider,
+        .proj-spacer { display: none; }
+        #proj-right { min-height: 0 !important; }
+        #hero-slideshow { height: 65vh !important; }
+        .yt-trigger { height: 56vw !important; }
+        .proj-solo { min-height: 0 !important; }
+        .proj-nav .proj-nav-title { white-space: normal; }
+    }
+
     .back-link:hover { color: #261F1C !important; }
     .cta-btn:hover   { background: #c3ef5c !important; color: #1e1b1f !important; }
     .next-btn {
-        width: 40px; height: 40px; border-radius: 50%;
+        width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
         border: 1.5px solid #261F1C; display: flex;
         align-items: center; justify-content: center;
         text-decoration: none; color: #261F1C;
-        transition: background 0.2s, color 0.2s; margin-top: 0.2rem;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .next-btn:hover { background: #c3ef5c; border-color: #c3ef5c; color: #1e1b1f; }
-    .next-btn:hover svg { stroke: #1e1b1f; }
+    .proj-nav-link:hover .next-btn { background: #c3ef5c; border-color: #c3ef5c; color: #1e1b1f; }
+
+    /* Navigation précédent / suivant */
+    .proj-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(38,31,28,0.1);
+    }
+    .proj-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+        text-decoration: none;
+    }
+    .proj-nav-next { text-align: right; }
+    .proj-nav-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+        font-family: 'Montserrat';
+        text-transform: uppercase;
+    }
+    .proj-nav-label {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        color: #261F1C;
+    }
+    .proj-nav-title {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        color: rgba(38,31,28,0.8);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     #proj-left::-webkit-scrollbar { width: 0; }
     #proj-left { scrollbar-width: none; }
     .tab-btn:hover { color: #261F1C !important; }
@@ -297,7 +372,7 @@ const sections = [
                 var el = b as HTMLElement;
                 var active = el.getAttribute("data-tab") === idx;
                 el.style.color        = active ? "#261F1C" : "rgba(38,31,28,0.35)";
-                el.style.borderBottom = active ? "2px solid #B50D0B" : "2px solid transparent";
+                el.style.borderBottom = active ? "2px solid #C3EF5C" : "2px solid transparent";
             });
             tabContents.forEach(function (c) {
                 (c as HTMLElement).style.display = (c as HTMLElement).getAttribute("data-tab") === idx ? "block" : "none";
@@ -386,19 +461,28 @@ const sections = [
             if (thumbImg) thumbImg.style.opacity = "0.7";
             if (playBtn)  playBtn.style.background = "rgba(255,255,255,0.15)";
         });
-        thumb.addEventListener("click", function () {
+        function closeLb() {
+            lb.style.display = "none"; fr.src = "";
+            document.body.style.overflow = "";
+        }
+        thumb.addEventListener("click", function (e) {
+            // la lightbox est dans la vignette : un clic dedans (croix, fond) ne doit pas la rouvrir
+            if (lb.contains(e.target as Node)) return;
             lb.style.display = "flex";
             fr.src = fr.getAttribute("data-src") || "";
             document.body.style.overflow = "hidden";
         });
         if (closeBtn) {
-            closeBtn.addEventListener("click", function () {
-                lb.style.display = "none"; fr.src = "";
-                document.body.style.overflow = "";
+            closeBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                closeLb();
             });
         }
         lb.addEventListener("click", function (e) {
-            if (e.target === lb) { lb.style.display = "none"; fr.src = ""; document.body.style.overflow = ""; }
+            if (e.target === lb) closeLb();
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && lb.style.display === "flex") closeLb();
         });
     }
 

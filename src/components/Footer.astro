@@ -21,6 +21,89 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
         z-index: 0;
     }
 
+    .ft-contact-m {
+        display: none;
+    }
+
+    /* Mobile : tout le contenu, en plus petit et rangé sur deux colonnes */
+    @media (max-width: 767px) {
+        footer .grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2rem 1rem;
+        }
+        .ft-col-social {
+            grid-column: 1 / -1;
+            order: -1;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            column-gap: 0.4em;
+        }
+        .ft-col-social > div {
+            flex-basis: 100%;
+            margin-top: 0.9rem;
+        }
+        .ft-col-social .ft-follow,
+        .ft-col-social .ft-follow-me {
+            display: inline;
+            font-size: 11px !important;
+            line-height: 1 !important;
+            letter-spacing: 0.2em;
+            font-weight: 700;
+        }
+        .ft-col-social .ft-follow,
+        .ft-col-social .ft-follow-me {
+            margin: 0 !important;
+        }
+        .ft-col-social img {
+            width: 1.6rem;
+            height: 1.6rem;
+        }
+        .ft-col-projets {
+            text-align: left;
+        }
+        .ft-col-res {
+            text-align: right;
+        }
+        .ft-col-projets .footer-title,
+        .ft-col-res .footer-title {
+            font-size: 11px !important;
+            line-height: 1.2 !important;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.9rem !important;
+        }
+        .ft-col-projets .text-content,
+        .ft-col-res .text-content {
+            font-size: 13px !important;
+            line-height: 1.35 !important;
+        }
+        .ft-col-projets ul,
+        .ft-col-res ul {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+        .ft-col-projets ul > * + *,
+        .ft-col-res ul > * + * {
+            margin-top: 0 !important;
+        }
+        .ft-desktop-only {
+            display: none;
+        }
+        .ft-contact-m {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-family: "Montserrat";
+            font-size: 15px;
+            font-weight: 700;
+        }
+    }
+
     .footer-signature {
         overflow: hidden;
         pointer-events: none;
@@ -53,12 +136,12 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
     <div class="w-full border-t border-black"></div>
 
     <footer class="relative w-full bg-black overflow-hidden">
-        <div class="max-w-7xl mx-auto py-12 md:py-16 px-6 md:px-16">
+        <div class="max-w-7xl mx-auto py-10 md:py-16 px-6 md:px-16">
             <div
-                class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16"
+                class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-12 mb-10 md:mb-16"
             >
                 <!-- COLONNE 1 : MES PROJETS -->
-                <div class="text-center md:text-left">
+                <div class="ft-col-projets text-center md:text-left">
                     <a
                         href="/projets"
                         class="footer-title mb-4 md:mb-6 text-white hover:text-red transition-colors block"
@@ -99,7 +182,7 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
                             </a>
                         </li>
                         <!-- Téléphone -->
-                        <li class="pt-[15px]">
+                        <li class="ft-desktop-only pt-[15px]">
                             <a
                                 href="tel:+33768639449"
                                 class="footer-title text-white hover:text-red transition-colors block"
@@ -111,11 +194,11 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
                 </div>
 
                 <!-- COLONNE 2 : FOLLOW ME ON -->
-                <div class="flex flex-col items-center">
-                    <p class="footer-title mb-1 md:mb-2 text-white text-center">
+                <div class="ft-col-social flex flex-col items-center">
+                    <p class="ft-follow footer-title mb-1 md:mb-2 text-white text-center">
                         FOLLOW
                     </p>
-                    <p class="text-content text-white mb-4 md:mb-6 text-center">
+                    <p class="ft-follow-me text-content text-white mb-4 md:mb-6 text-center">
                         ME ON
                     </p>
                     <div
@@ -164,7 +247,7 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
                 </div>
 
                 <!-- COLONNE 3 : RESSOURCES -->
-                <div class="text-center md:text-right">
+                <div class="ft-col-res text-center md:text-right">
                     <p class="footer-title mb-4 md:mb-6 text-white">
                         RESSOURCES
                     </p>
@@ -202,7 +285,7 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
                             </a>
                         </li>
                         <!-- Email -->
-                        <li class="pt-[15px]">
+                        <li class="ft-desktop-only pt-[15px]">
                             <a
                                 href="mailto:camillenorrito.pro@gmail.com"
                                 class="footer-title text-white hover:text-red transition-colors block"
@@ -211,6 +294,11 @@ import Icon_linkedin from "../assets/icons/Icon_linkedin.svg";
                             </a>
                         </li>
                     </ul>
+                </div>
+                <!-- Mobile : téléphone et e-mail regroupés sous les colonnes -->
+                <div class="ft-contact-m">
+                    <a href="tel:+33768639449" class="text-white hover:text-red transition-colors">+(33) 7 68 63 94 49</a>
+                    <a href="mailto:camillenorrito.pro@gmail.com" class="text-white hover:text-red transition-colors">camillenorrito.pro@gmail.com</a>
                 </div>
             </div>
         </div>

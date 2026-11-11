@@ -75,15 +75,15 @@ if (Astro.request.method === "POST") {
     <main class="bg-white">
         <div class="pt-28 md:pt-32">
             <div
-                class="flex flex-col lg:flex-row min-h-[600px] px-10 md:px-16 lg:px-20 pb-24"
+                class="flex flex-col lg:flex-row min-h-[600px] px-6 md:px-16 lg:px-20 pb-24"
             >
                 <!-- Colonne gauche -->
                 <div
-                    class="flex flex-col justify-between lg:w-1/2 pr-10 lg:pr-16 pb-16 lg:pb-0"
+                    class="flex flex-col justify-between lg:w-1/2 lg:pr-16 pb-12 lg:pb-0"
                 >
                     <h5
                         class="text-[#261F1C] uppercase"
-                        style="font-family:'Montserrat';font-size:90px;font-weight:400;line-height:85%;"
+                        style="font-family:'Montserrat';font-size:clamp(52px,14vw,90px);font-weight:400;line-height:85%;"
                     >
                         CONTACTEZ<br />MOI
                     </h5>
@@ -91,14 +91,14 @@ if (Astro.request.method === "POST") {
                         <a
                             href="tel:+33768639449"
                             class="text-brown hover:text-red transition-colors block"
-                            style="font-family:'Montserrat';font-size:25px;font-weight:600;"
+                            style="font-family:'Montserrat';font-size:clamp(17px,4.6vw,25px);font-weight:600;"
                         >
                             +(33) 7 68 63 94 49
                         </a>
                         <a
                             href="mailto:camillenorrito.pro@gmail.com"
                             class="text-brown hover:text-red transition-colors block"
-                            style="font-family:'Montserrat';font-size:25px;font-weight:600;"
+                            style="font-family:'Montserrat';font-size:clamp(17px,4.6vw,25px);overflow-wrap:anywhere;font-weight:600;"
                         >
                             camillenorrito.pro@gmail.com
                         </a>
@@ -111,7 +111,7 @@ if (Astro.request.method === "POST") {
 
                 <!-- Colonne droite : formulaire -->
                 <div
-                    class="lg:w-1/2 pl-10 lg:pl-16 flex flex-col justify-center"
+                    class="lg:w-1/2 lg:pl-16 flex flex-col justify-center"
                 >
                     {
                         formSent && (

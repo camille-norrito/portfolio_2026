@@ -78,12 +78,13 @@ const slices = Array.from({ length: SLICES }, (_, k) => k);
         pointer-events: none;
         will-change: transform, opacity;
     }
+    /* « PROJETS » est plus long que « MES » : on décale le duo pour qu'il soit centré */
     .ribbon-word-left {
-        right: 50%;
+        right: calc(50% + 1.3em);
         transform: translateY(-110%);
     }
     .ribbon-word-right {
-        left: 50%;
+        left: calc(50% - 1.3em);
         transform: translateY(0%);
     }
 
@@ -361,7 +362,7 @@ const slices = Array.from({ length: SLICES }, (_, k) => k);
             var morphAll = step(p, 0.42, 0.58);
 
             // Les deux mots s'écartent puis s'effacent
-            var spread = travel * W * 0.22;
+            var spread = travel * W * (W < 768 ? 0.08 : 0.22);
             var wordsOp = String(1 - step(p, 0.42, 0.58));
             if (left) {
                 left.style.transform = "translate(" + -spread + "px, -110%)";

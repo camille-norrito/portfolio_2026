@@ -16,6 +16,8 @@ export interface Projet {
     cover: string | null;
     heroImages: string[];
     planches: string[];
+    // Texte du bouton vers le lien externe (par défaut « Voir le projet »)
+    ctaLabel?: string;
 }
 
 // Catégories du site
@@ -173,21 +175,26 @@ export const projets: Projet[] = [
         ],
         hasDetailPage: true,
         externalLink: "https://lison33.582helvetica.com/La-Quete/",
+        ctaLabel: "Découvrir le jeu",
         cover: "/assets/projets/la-quete/cover_laquete_22l9svon9j.png",
         heroImages: [],
         planches: [
+            "/assets/projets/la-quete/web-laquete.webp",
             "/assets/projets/la-quete/moodboard_laquete_04chrvwvue.png",
+            "/assets/projets/la-quete/foret.webp",
+            "/assets/projets/la-quete/lagon.webp",
+            "/assets/projets/la-quete/perso-objet.webp",
         ],
     },
     {
         title: "Yumly",
         slug: "yumly",
         subtitle: "Plateforme e-commerce",
-        description: "Ce projet a été réalisé dans le cadre d'un cours de communication et développement web en groupe. Nous avons conçu de A à Z une plateforme e-commerce permettant aux utilisateurs de découvrir et acheter des produits alimentaires issus des cultures asiatiques, africaines, latino-américaines et méditerranéennes.",
-        intention: "L'objectif était de créer une expérience digitale intuitive et immersive, capable de valoriser la richesse des cuisines du monde tout en soutenant les épiceries locales. Je souhaitais proposer une interface à la fois esthétique et accessible, en accord avec les valeurs d'authenticité et de découverte de la marque.",
-        recherches: "Nous avons mené une analyse approfondie du marché des épiceries ethniques en France : étude de la concurrence, analyse SWOT, définition de personas et de cibles. Cette phase nous a permis de construire un positionnement différenciant et de définir une stratégie d'acquisition cohérente.",
-        conception: "À partir de ces recherches, nous avons développé l'identité visuelle de Yumly — nom, slogan, charte graphique — ainsi que l'architecture du site et les maquettes UX/UI sur Figma. Chaque choix de design a été pensé pour refléter l'univers multiculturel de la plateforme.",
-        critiques: "Avec du recul, la gestion du temps entre la partie communication et la partie développement a parfois manqué d'équilibre. Il aurait été pertinent de définir plus tôt une direction artistique commune afin d'assurer une cohérence totale entre le dossier de communication et les maquettes visuelles.",
+        description: "C'est un projet en groupe où on a développé de A à Z une plateforme e-commerce pour découvrir et acheter des produits alimentaires du monde entier.",
+        intention: "",
+        recherches: "",
+        conception: "",
+        critiques: "",
         category: [
             "Stratégie de communication",
             "UX/UI Design",
@@ -202,7 +209,12 @@ export const projets: Projet[] = [
         externalLink: "",
         cover: "/assets/projets/yumly/mokeup_take_away_tgkzedd3bq.webp",
         heroImages: [],
-        planches: [],
+        planches: [
+            "/assets/projets/yumly/yumly.webp",
+            "/assets/projets/yumly/plats.webp",
+            "/assets/projets/yumly/maquettes.webp",
+            "/assets/projets/yumly/persos.webp",
+        ],
     },
     {
         title: "Vlog Toronto",
