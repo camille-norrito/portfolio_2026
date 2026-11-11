@@ -1,53 +1,29 @@
 ---
 // src/pages/gallery/[slug].astro
 import Layout from "../../layouts/Layout.astro";
-import Header from "../../components/Header.astro";
 
-const PB_URL = "http://127.0.0.1:8090";
+import { galleries as allGalleries, type Gallery } from "../../data/galleries";
 
-interface Gallery {
-    id: string;
-    collectionId: string;
-    title: string;
-    slug: string;
-    description: string;
-    cover: string;
-    photos: string[];
-    order: number;
+export const prerender = true;
+
+export function getStaticPaths() {
+    return allGalleries.map((g) => ({ params: { slug: g.slug } }));
 }
-
-const resAll = await fetch(
-    `${PB_URL}/api/collections/galleries/records?perPage=50&sort=order`,
-);
-const dataAll = await resAll.json();
-const allGalleries: Gallery[] = dataAll.items || [];
 
 const { slug } = Astro.params;
-const resCurrent = await fetch(
-    `${PB_URL}/api/collections/galleries/records?filter=(slug='${slug}')`,
-);
-const dataCurrent = await resCurrent.json();
-const gallery: Gallery = dataCurrent.items?.[0];
-
-if (!gallery) {
-    return Astro.redirect("/404");
-}
 
 const currentIndex = allGalleries.findIndex((g: Gallery) => g.slug === slug);
+const gallery: Gallery = allGalleries[currentIndex];
 const nextGallery: Gallery | null =
     allGalleries[currentIndex + 1] || allGalleries[0];
 
-const photoUrl = (filename: string) =>
-    `${PB_URL}/api/files/${gallery.collectionId}/${gallery.id}/${filename}`;
+const photos = gallery.photos;
+const p = (i: number) => photos[i] || "";
 
-const photos = Array.isArray(gallery.photos) ? gallery.photos : [];
-const p = (i: number) => (photos[i] ? photoUrl(photos[i]) : "");
-
-const allPhotoUrls = photos.map(photoUrl);
+const allPhotoUrls = photos;
 ---
 
 <Layout title={`${gallery.title} — Camille Norrito`}>
-    <Header />
 
     <main class="page-main">
         <!-- COLONNE GAUCHE : photos + infos -->
@@ -141,6 +117,24 @@ const allPhotoUrls = photos.map(photoUrl);
                 </div>
             </div>
 
+            <!-- MOBILE : photos empilées, écran bloqué pendant le défilement -->
+            <div class="m-stage" id="m-stage" style={`--n:${photos.length}`}>
+                <div class="m-pin">
+                    {photos.map((src, i) => (
+                        <div class="m-card">
+                            <img
+                                src={src}
+                                alt={`${gallery.title} ${i + 1}`}
+                                loading={i < 2 ? "eager" : "lazy"}
+                                data-index={i}
+                                class="lightbox-trigger"
+                            />
+                        </div>
+                    ))}
+                    <p class="m-counter" id="m-counter" aria-hidden="true">01 / {String(photos.length).padStart(2, "0")}</p>
+                </div>
+            </div>
+
             <!-- Titre + description + bouton — collé juste sous les photos, 0 marge -->
             <div class="info-row reveal" style="--delay:0.3s">
                 <div class="info-left">
@@ -181,7 +175,7 @@ const allPhotoUrls = photos.map(photoUrl);
             <p class="follow-title">FOLLOW<br />ME ON</p>
             <div class="social-icons">
                 <a
-                    href="https://instagram.com/"
+                    href="https://www.instagram.com/camille.norrito"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
@@ -197,7 +191,7 @@ const allPhotoUrls = photos.map(photoUrl);
                     <img src="/assets/icons/Icon_behance.svg" alt="Behance" />
                 </a>
                 <a
-                    href="https://linkedin.com/in/"
+                    href="https://www.linkedin.com/in/camille-norrito-9b25a0334"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="LinkedIn"
@@ -336,9 +330,12 @@ const allPhotoUrls = photos.map(photoUrl);
         color: #261f1c;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        max-width: none;
-        width: 100%;
         margin: 0;
+    }
+    @media (min-width: 1024px) {
+        .gallery-desc {
+            max-width: 50%;
+        }
     }
 
     .info-right {
@@ -384,10 +381,11 @@ const allPhotoUrls = photos.map(photoUrl);
         margin-top: 6px;
     }
     .next-btn:hover .next-circle {
-        background: #261f1c;
+        background: #c3ef5c;
+        border-color: #c3ef5c;
     }
     .next-btn:hover .next-circle svg {
-        stroke: #fff;
+        stroke: #1e1b1f;
     }
 
     .sidebar {
@@ -514,10 +512,82 @@ const allPhotoUrls = photos.map(photoUrl);
         transform: translateY(0);
     }
 
+    .m-stage {
+        display: none;
+    }
+
+    /* ── Mobile : écran bloqué, les photos défilent en pile ── */
     @media (max-width: 768px) {
         .page-main {
             flex-direction: column;
+            padding-top: 2rem;
         }
+        .photos-col {
+            padding: 0 0 2rem;
+            gap: 0;
+        }
+        .grid-row {
+            display: none;
+        }
+        .info-row {
+            display: contents;
+        }
+        .info-left {
+            order: -1;
+            padding: 0 16px 1.5rem;
+        }
+        .info-right {
+            order: 99;
+            justify-content: flex-end;
+            padding: 1.5rem 16px 0;
+        }
+        .gallery-title {
+            font-size: clamp(32px, 11vw, 72px);
+            overflow-wrap: anywhere;
+        }
+
+        /* Hauteur = distance de scroll : ~70 % d'écran par photo */
+        .m-stage {
+            display: block;
+            position: relative;
+            height: calc((var(--n) - 1) * 70vh + 100vh - 72px);
+        }
+        .m-pin {
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 72px);
+            overflow: hidden;
+        }
+        .m-card {
+            position: absolute;
+            inset: 16px 16px 40px;
+            overflow: hidden;
+            background: #f0ece8;
+            transform-origin: 50% 0;
+            will-change: transform;
+        }
+        .m-card + .m-card {
+            transform: translateY(110%);
+        }
+        .m-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: filter 0.2s;
+        }
+        .m-counter {
+            position: absolute;
+            left: 16px;
+            bottom: 12px;
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: #261f1c;
+        }
+
         .sidebar {
             width: 100%;
             flex-direction: row;
@@ -527,20 +597,9 @@ const allPhotoUrls = photos.map(photoUrl);
             padding: 16px;
             gap: 2rem;
         }
-        .grid-row {
-            flex-wrap: wrap;
-            height: auto !important;
-        }
-        .cell {
-            flex: 1 1 45% !important;
-            height: 130px;
-        }
-        .info-row {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .gallery-title {
-            font-size: clamp(38px, 14vw, 72px);
+        .social-icons {
+            flex-direction: row;
+            gap: 1.5rem;
         }
     }
 </style>
@@ -595,4 +654,48 @@ const allPhotoUrls = photos.map(photoUrl);
         if (e.key === "ArrowLeft") showPrev();
         if (e.key === "ArrowRight") showNext();
     });
+
+    // Mobile : pile de photos pilotée par le scroll
+    (function () {
+        const stage = document.getElementById("m-stage");
+        const counter = document.getElementById("m-counter");
+        if (!stage) return;
+        const pin = stage.querySelector(".m-pin");
+        const cards = Array.from(stage.querySelectorAll(".m-card"));
+        const n = cards.length;
+        const total = String(n).padStart(2, "0");
+        const clamp01 = (x) => Math.min(1, Math.max(0, x));
+        let ticking = false;
+
+        function update() {
+            ticking = false;
+            if (stage.offsetHeight === 0) return; // desktop : pile masquée
+            const range = stage.offsetHeight - pin.offsetHeight;
+            const p = range > 0 ? clamp01(-stage.getBoundingClientRect().top / range) : 0;
+            const f = p * (n - 1);
+
+            cards.forEach((card, i) => {
+                // photo suivante : monte depuis le bas ; photos recouvertes : reculent et s'assombrissent
+                const enter = i === 0 ? 0 : clamp01(1 - (f - (i - 1)));
+                const covered = clamp01(f - i);
+                card.style.transform =
+                    `translateY(${enter * 110}%) scale(${1 - covered * 0.08})`;
+                const img = card.querySelector("img");
+                if (img) img.style.filter = covered > 0 ? `brightness(${1 - covered * 0.45})` : "";
+            });
+
+            if (counter)
+                counter.textContent = `${String(Math.min(n, Math.round(f) + 1)).padStart(2, "0")} / ${total}`;
+        }
+
+        function onScroll() {
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(update);
+            }
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
+        update();
+    })();
 </script>

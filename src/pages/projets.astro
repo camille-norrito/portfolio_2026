@@ -1,460 +1,354 @@
 ---
 // src/pages/projets.astro
 import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
-import HeroVideo from "../components/HeroVideo.astro";
+import { categories, projetsByCategory } from "../data/projets";
+import { galleries } from "../data/galleries";
 
-const PB_URL = "http://127.0.0.1:8090";
-
-let projets = [];
-try {
-    const res = await fetch(
-        `${PB_URL}/api/collections/projects/records?sort=order&perPage=50`,
-    );
-    const data = await res.json();
-    projets = data.items.map((p: any) => {
-        const comps = Array.isArray(p.competences) ? p.competences : [];
-        const isGroup = p.is_group === true || comps.some((c: string) =>
-            c.toLowerCase().includes('collaborat') ||
-            c.toLowerCase().includes('groupe') ||
-            c.toLowerCase().includes('équipe') ||
-            c.toLowerCase().includes('equipe')
-        );
-        return {
-            title: p.title,
-            slug: p.slug,
-            subtitle: p.subtitle || null,
-            category: Array.isArray(p.category) ? p.category.join(' ') : (p.category || ''),
-            isGroup,
-            coverUrl: p.cover
-                ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.cover}`
-                : null,
-            hasDetailPage: p.has_detail_page,
-            externalLink: p.external_link,
-        };
-    });
-} catch (e) {
-    console.error("Erreur fetch projets PocketBase:", e);
-}
-
-const galleries = [
-    {
-        slug: "toronto",
-        title: "TORONTO",
-        count: "12",
-        image: "/assets/img/gallery-cover-toronto.png",
-    },
-    {
-        slug: "vancouver",
-        title: "VANCOUVER",
-        count: "07",
-        image: "/assets/img/gallery-cover-vancouver.png",
-    },
-    {
-        slug: "photoshoot",
-        title: "PHOTOSHOOT",
-        count: "25",
-        image: "/assets/img/gallery-cover-photoshoot.png",
-    },
-    {
-        slug: "maroc",
-        title: "MAROC",
-        count: "08",
-        image: "/assets/img/gallery-cover-maroc.png",
-    },
-    {
-        slug: "nyc",
-        title: "NEW YORK",
-        count: "17",
-        image: "/assets/img/gallery-cover-nyc.png",
-    },
-    {
-        slug: "bali",
-        title: "BALI",
-        count: "14",
-        image: "/assets/img/gallery-cover-bali.png",
-    },
-];
+const rows = categories
+    .map((c) => ({ ...c, projets: projetsByCategory(c.match) }))
+    .filter((r) => r.projets.length > 0);
 ---
 
 <Layout title="Projets - Camille Norrito">
-    <Header />
+    <div class="pj-page">
+        <!-- SHOWREEL -->
+        <div id="pj-reel" class="pj-reel" aria-hidden="true">
+            <video id="pj-reel-video" src="/showreel-2027.mp4" autoplay muted loop playsinline preload="auto"></video>
+            <div class="pj-reel-shade"></div>
+        </div>
 
-    <main class="bg-white overflow-x-hidden">
-        <!-- HERO VIDÉO — plein écran, pas de padding top -->
-        <HeroVideo />
-
-        <!-- S2 : FILTRES + GRILLE PROJETS -->
-        <section id="projets-grid" class="px-6 md:px-16 py-16 md:py-24">
-
-            <!-- FILTRES -->
-            <div style="max-width:960px;margin:0 auto 3rem;">
-
-                <!-- Ligne 1 : catégories -->
-                <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid rgba(38,31,28,0.12);margin-bottom:1.5rem;">
-                    <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:rgba(38,31,28,0.35);text-transform:uppercase;margin-right:2rem;flex-shrink:0;">Catégorie</span>
-                    {[
-                        { label: "Tous",        val: "Tous" },
-                        { label: "Affiche",     val: "Conception graphique" },
-                        { label: "Identité",    val: "Identité visuelle" },
-                        { label: "Jeu vidéo",  val: "Conception de jeu" },
-                        { label: "UX/UI",       val: "UX/UI" },
-                        { label: "Audiovisuel", val: "Production audiovisuelle" },
-                    ].map((cat) => (
-                        <button
-                            class="filter-cat"
-                            data-cat={cat.val}
-                            style={`font-family:'Montserrat';font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:${cat.val === 'Tous' ? '#261F1C' : 'rgba(38,31,28,0.4)'};background:none;border:none;border-bottom:2px solid ${cat.val === 'Tous' ? '#B50D0B' : 'transparent'};padding:0.75rem 1rem;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;`}
-                        >
-                            {cat.label}
-                        </button>
-                    ))}
+        <!-- INTRO -->
+        <section class="pj-hero">
+            <div class="pj-grid pj-hero-top">
+                <h1 class="pj-page-title">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <rect x="6" y="2.5" width="12" height="2.5" rx="1.25"></rect>
+                        <rect x="4" y="6.5" width="16" height="2.5" rx="1.25"></rect>
+                        <rect x="2.5" y="10.5" width="19" height="11" rx="3"></rect>
+                    </svg>
+                    Projets
+                </h1>
+                <div class="pj-hero-meta">
+                    <p>Étudiante en 3ème année de BUT MMI à Montbéliard, entre design graphique, branding et motion design.</p>
+                    <p>Du concept à la direction artistique finale, chaque projet part d'une intention.</p>
+                    <p class="pj-hero-date">Showreel<br />2027</p>
                 </div>
-
-                <!-- Ligne 2 : Solo / Groupe -->
-                <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid rgba(38,31,28,0.12);">
-                    <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:rgba(38,31,28,0.35);text-transform:uppercase;margin-right:2rem;flex-shrink:0;">Type</span>
-                    {["Tous", "Solo", "Groupe"].map((type) => (
-                        <button
-                            class="filter-type"
-                            data-type={type}
-                            style={`font-family:'Montserrat';font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:${type === 'Tous' ? '#261F1C' : 'rgba(38,31,28,0.4)'};background:none;border:none;border-bottom:2px solid ${type === 'Tous' ? '#B50D0B' : 'transparent'};padding:0.75rem 1rem;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;`}
-                        >
-                            {type}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <!-- GRILLE -->
-            <div
-                id="projets-grille"
-                class="grid grid-cols-3 gap-6 md:gap-8"
-                style="max-width:960px;margin:0 auto;"
-            >
-                {
-                    projets.map((p: any) => (
-                        <a
-                            href={"/projets/" + p.slug}
-                            class="projet-card group block"
-                            data-category={p.category || ""}
-                            data-group={p.isGroup ? "groupe" : "solo"}
-                            style="text-decoration:none;"
-                        >
-                            <div class="projet-cover" style="aspect-ratio:1/1;overflow:hidden;background:#f0ece8;width:280px;max-width:100%;position:relative;">
-                                <img
-                                    src={p.coverUrl || ""}
-                                    alt={p.title}
-                                    style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;"
-                                    class="projet-img"
-                                />
-                                <!-- HOVER OVERLAY -->
-                                <div class="projet-overlay" style="position:absolute;inset:0;background:rgba(10,8,8,0);transition:background 0.4s ease;display:flex;flex-direction:column;justify-content:space-between;padding:0.9rem;">
-                                    <div class="projet-top" style="opacity:0;transform:translateY(-8px);transition:opacity 0.35s ease,transform 0.35s ease;">
-                                        <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.22em;color:white;text-transform:uppercase;">[ {p.category || "—"} ]</span>
-                                    </div>
-                                    <div class="projet-bottom" style="opacity:0;transform:translateY(8px);transition:opacity 0.35s ease,transform 0.35s ease;">
-                                        <p style="font-family:'Horizon';font-size:14px;color:white;text-transform:uppercase;letter-spacing:0.02em;line-height:1.1;margin-bottom:0.2rem;">{p.title}</p>
-                                        {p.subtitle && <p style="font-family:'Montserrat';font-size:9px;color:rgba(255,255,255,0.65);letter-spacing:0.1em;text-transform:uppercase;">{p.subtitle}</p>}
-                                    </div>
-                                </div>
-                            </div>
-                            <p style="font-family:'Montserrat';font-size:11px;font-weight:700;letter-spacing:0.18em;color:#261F1C;text-transform:uppercase;margin-top:0.75rem;">
-                                {p.title}
-                            </p>
-                        </a>
-                    ))
-                }
             </div>
         </section>
 
-        <!-- S3 : GALLERY — SCROLL HORIZONTAL -->
-        <div id="gallery-wrapper" style="position:relative;">
-            <div
-                id="gallery-section"
-                style="position:sticky;top:0;height:100vh;background:#000;display:flex;flex-direction:column;overflow:hidden;"
-            >
-                <div
-                    id="gallery-slides-area"
-                    style="flex:1;min-height:0;position:relative;overflow:hidden;"
-                >
-                    <div
-                        id="gallery-track"
-                        style="display:flex;align-items:center;height:100%;gap:3rem;will-change:transform;transform:translateX(0px);"
-                    >
-                        {
-                            galleries.map((g) => (
-                                <a
-                                    href={"/gallery/" + g.slug}
-                                    class="gallery-card"
-                                    style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1.25rem;text-decoration:none;cursor:pointer;"
-                                >
-                                    <div style="overflow:hidden;width:clamp(200px,18vw,280px);height:clamp(265px,24vw,375px);">
-                                        <img
-                                            src={g.image}
-                                            alt={g.title}
-                                            style="width:100%;height:100%;object-fit:cover;"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                    <div style="text-align:center;">
-                                        <p style="font-family:'Montserrat';font-size:clamp(10px,0.95vw,12px);font-weight:700;letter-spacing:0.18em;color:white;text-transform:uppercase;margin-bottom:0.2rem;">
-                                            {g.title}
-                                        </p>
-                                        <p style="font-family:'Montserrat';font-size:clamp(9px,0.78vw,11px);font-weight:400;letter-spacing:0.12em;color:rgba(255,255,255,0.4);text-transform:uppercase;">
-                                            {g.count} IMAGES
-                                        </p>
-                                    </div>
-                                </a>
-                            ))
-                        }
-                    </div>
-
-                    <!-- Flèches -->
-                    <div
-                        style="position:absolute;bottom:1.25rem;right:2.5rem;display:flex;gap:0.75rem;z-index:20;"
-                    >
-                        <button
-                            id="gallery-prev"
-                            style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:transparent;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;"
-                            aria-label="Precedent"
-                        >
-                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <button
-                            id="gallery-next"
-                            style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:transparent;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;"
-                            aria-label="Suivant"
-                        >
-                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
-                        </button>
-                    </div>
-
-                    <!-- Hint -->
-                    <div
-                        id="gallery-hint"
-                        style="position:absolute;bottom:1.25rem;left:2.5rem;display:flex;align-items:center;gap:6px;font-family:'Montserrat';font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.22);z-index:20;transition:opacity 0.6s;"
-                    >
-                        <span>Scroll</span>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>
-                    </div>
-
-                    <!-- Progress bar -->
-                    <div style="position:absolute;bottom:0;left:0;width:100%;height:2px;background:rgba(255,255,255,0.08);z-index:20;">
-                        <div id="gallery-progress" style="height:100%;width:0%;background:#B50D0B;transition:width 0.05s linear;"></div>
-                    </div>
+        <!-- PROJETS PAR CATÉGORIE -->
+        {rows.map((r) => (
+            <section class="pj-grid pj-row" id={"cat-" + r.key}>
+                <h2 class="pj-row-label">
+                    {r.label}
+                    <span>{String(r.projets.length).padStart(2, "0")}</span>
+                </h2>
+                <div class="pj-track">
+                    {r.projets.map((p) => (
+                        <a href={"/projets/" + p.slug} class="pj-card">
+                            <div class="pj-card-img">
+                                {p.cover && <img src={p.cover} alt={p.title.trim()} loading="lazy" />}
+                            </div>
+                            <p class="pj-card-title">{p.title.trim()}</p>
+                            <p class="pj-card-sub">{p.subtitle || p.category[0]}</p>
+                        </a>
+                    ))}
                 </div>
+            </section>
+        ))}
 
-                <!-- Bandeau GALLERY -->
-                <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;padding:0.85rem 3.5rem;gap:1.5rem;background:#000;">
-                    <span class="numero-2 leading-none" style="color:white;font-family:'Against';">01</span>
-                    <span style="font-family:'Montserrat';font-size:clamp(60px,10vw,100px);letter-spacing:0.02em;line-height:1;color:white;text-transform:uppercase;flex:1;text-align:right;">GALLERY</span>
-                </div>
+        <!-- GALERIE -->
+        <section class="pj-grid pj-row" id="galerie">
+            <h2 class="pj-row-label">
+                Galerie
+                <span>{String(galleries.length).padStart(2, "0")}</span>
+            </h2>
+            <div class="pj-track">
+                {galleries.map((g) => (
+                    <a href={"/gallery/" + g.slug} class="pj-gal-card">
+                        {(g.cover || g.photos[0]) && <img src={g.cover || g.photos[0]} alt="" loading="lazy" />}
+                        <div class="pj-gal-content">
+                            <p class="pj-gal-brand">Camille Norrito<br />Galerie photo</p>
+                            <p class="pj-gal-title">{g.title}</p>
+                            <p class="pj-gal-count">{g.photos.length} photos</p>
+                        </div>
+                    </a>
+                ))}
             </div>
-        </div>
-    </main>
+        </section>
+    </div>
 </Layout>
 
 <style>
-    .projet-card:hover .projet-img {
+    .pj-page {
+        --pj-bg: #0e0c0b;
+        --pj-text: #f5f0ea;
+        --pj-muted: rgba(245, 240, 234, 0.55);
+        --pj-line: rgba(245, 240, 234, 0.12);
+        --pj-label: clamp(140px, 18vw, 280px);
+        position: relative;
+        isolation: isolate;
+        background: var(--pj-bg);
+        color: var(--pj-text);
+        padding: 0 2.5rem 6rem;
+        font-family: "Montserrat";
+    }
+
+    /* ── Showreel ── */
+    .pj-reel {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-w);
+        right: 0;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .pj-reel video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .pj-reel-shade {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(14, 12, 11, 0.55) 0%,
+            rgba(14, 12, 11, 0.2) 40%,
+            rgba(14, 12, 11, 0.85) 100%
+        );
+    }
+
+    .pj-hero,
+    .pj-row {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ── Grille ── */
+    .pj-grid {
+        display: grid;
+        grid-template-columns: var(--pj-label) minmax(0, 1fr);
+        column-gap: 2rem;
+    }
+
+    /* ── Intro ── */
+    .pj-hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding-top: 1.75rem;
+    }
+    .pj-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-family: "Montserrat";
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--pj-text);
+        margin: 0;
+        align-self: start;
+    }
+    .pj-hero-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 260px)) 1fr;
+        gap: 1.75rem;
+        font-size: 15px;
+        line-height: 1.45;
+    }
+    .pj-hero-meta p {
+        margin: 0;
+    }
+    .pj-hero-date {
+        text-align: right;
+    }
+    .pj-hero-main {
+        flex: 1;
+        align-items: center;
+    }
+    .pj-headline {
+        max-width: 620px;
+        font-size: clamp(26px, 2.6vw, 38px);
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: -0.01em;
+        margin: 0;
+    }
+
+    /* ── Rangées ── */
+    .pj-row {
+        border-top: 1px solid var(--pj-line);
+        padding: 2.25rem 0;
+        scroll-margin-top: 1rem;
+    }
+    .pj-row-label {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        font-family: "Montserrat";
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--pj-text);
+        margin: 0;
+    }
+    .pj-row-label span {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--pj-muted);
+    }
+    .pj-track {
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .pj-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* ── Carte projet ── */
+    .pj-card {
+        flex: 0 0 clamp(180px, 16vw, 250px);
+        text-decoration: none;
+        color: var(--pj-text);
+    }
+    .pj-card-img {
+        aspect-ratio: 1 / 1;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1a1614;
+        margin-bottom: 0.85rem;
+    }
+    .pj-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .pj-card:hover .pj-card-img img {
+        transform: scale(1.04);
+    }
+    .pj-card-title {
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
+    }
+    .pj-card-sub {
+        font-size: 14px;
+        color: var(--pj-muted);
+        margin: 0.1rem 0 0;
+    }
+
+    /* ── Carte galerie ── */
+    .pj-gal-card {
+        position: relative;
+        flex: 0 0 clamp(180px, 16vw, 250px);
+        aspect-ratio: 3 / 4;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1a1614;
+        text-decoration: none;
+        color: #fff;
+    }
+    .pj-gal-card img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+    .pj-gal-card:hover img {
         transform: scale(1.05);
     }
-    .projet-card:hover .projet-overlay {
-        background: rgba(10,8,8,0.62) !important;
+    .pj-gal-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 1rem 1.1rem;
+        text-align: center;
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.55) 0%,
+            rgba(0, 0, 0, 0) 45%,
+            rgba(0, 0, 0, 0) 70%,
+            rgba(0, 0, 0, 0.45) 100%
+        );
     }
-    .projet-card:hover .projet-top {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
+    .pj-gal-brand {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        line-height: 1.35;
+        margin: 0 0 1.25rem;
     }
-    .projet-card:hover .projet-bottom {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
+    .pj-gal-title {
+        font-size: clamp(20px, 1.6vw, 24px);
+        font-weight: 500;
+        line-height: 1.1;
+        margin: 0;
+    }
+    .pj-gal-count {
+        margin: auto 0 0;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 767px) {
+        .pj-page {
+            padding: 0 1rem 4rem;
+        }
+        .pj-grid {
+            grid-template-columns: minmax(0, 1fr);
+            row-gap: 1.25rem;
+        }
+        .pj-hero-meta {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.75rem;
+            font-size: 14px;
+        }
+        .pj-hero-date {
+            text-align: left;
+        }
+        .pj-card,
+        .pj-gal-card {
+            flex-basis: 70vw;
+        }
     }
 </style>
 
 <script>
-    // ══════════════════════════════════════
-    //  FILTRES PROJETS
-    // ══════════════════════════════════════
     (function () {
-        var catButtons  = document.querySelectorAll(".filter-cat");
-        var typeButtons = document.querySelectorAll(".filter-type");
-        var cards       = document.querySelectorAll(".projet-card");
+        var reel = document.getElementById("pj-reel");
+        var video = document.getElementById("pj-reel-video") as HTMLVideoElement | null;
+        if (!reel || !video) return;
+        var r = reel, v = video;
 
-        var activeCat  = "Tous";
-        var activeType = "Tous";
-
-        var CAT_MAP: Record<string, string> = {
-            "Tous": "Tous",
-            "Conception graphique & communication visuelle": "Conception",
-            "Identité visuelle": "Identité",
-            "Jeu vidéo": "Jeu",
-            "UX/UI & Communication": "UX/UI",
-            "Production audiovisuelle & motion design": "Production"
-        };
-
-        function applyFilters() {
-            cards.forEach(function (card) {
-                var el       = card as HTMLElement;
-                var cat      = el.getAttribute("data-category") || "";
-                var group    = el.getAttribute("data-group") || "";
-                // Cherche si la valeur du filtre est CONTENUE dans la catégorie (multi-valeurs)
-                function normalize(s: string) {
-                    return s.toLowerCase()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                }
-                var showCat = activeCat === "Tous" || normalize(cat).includes(normalize(activeCat));
-                var showType = activeType === "Tous" || group === activeType.toLowerCase();
-                el.style.display = showCat && showType ? "block" : "none";
-            });
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            v.removeAttribute("autoplay");
+            v.pause();
         }
 
-        function setActiveBtn(btns: NodeListOf<Element>, active: string) {
-            btns.forEach(function (btn) {
-                var el  = btn as HTMLElement;
-                var val = el.getAttribute("data-cat") || el.getAttribute("data-type") || "";
-                var isActive = val === active;
-                el.style.color       = isActive ? "#261F1C" : "rgba(38,31,28,0.4)";
-                el.style.borderBottom = isActive ? "2px solid #B50D0B" : "2px solid transparent";
-            });
+        // Fondu du showreel au scroll
+        function update() {
+            var progress = Math.min(1, window.scrollY / (window.innerHeight * 0.8));
+            r.style.opacity = String(1 - progress);
+            var hidden = progress >= 1;
+            r.style.visibility = hidden ? "hidden" : "visible";
+            if (hidden && !v.paused) v.pause();
+            else if (!hidden && v.paused && v.hasAttribute("autoplay")) v.play().catch(function () {});
         }
-
-        catButtons.forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                activeCat = (btn as HTMLElement).getAttribute("data-cat") || "Tous";
-                setActiveBtn(catButtons, activeCat);
-                applyFilters();
-            });
-        });
-
-        typeButtons.forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                activeType = (btn as HTMLElement).getAttribute("data-type") || "Tous";
-                setActiveBtn(typeButtons, activeType);
-                applyFilters();
-            });
-        });
-    })();
-
-    (function () {
-        var section = document.getElementById("gallery-section");
-        var track = document.getElementById("gallery-track");
-        var progBar = document.getElementById("gallery-progress");
-        var hint = document.getElementById("gallery-hint");
-        var btnPrev = document.getElementById("gallery-prev");
-        var btnNext = document.getElementById("gallery-next");
-
-        if (!section || !track) return;
-
-        var maxScroll = 0;
-        var currentX = 0;
-        var targetX = 0;
-        var locked = false;
-        var hintHidden = false;
-        var savedScrollY = 0;
-        var touchStartY = 0;
-
-        function setup() {
-            if (!track) return;
-            track.style.paddingLeft = "0px";
-            var cards = track.querySelectorAll(".gallery-card");
-            var cardW = cards.length > 0 ? (cards[0] as HTMLElement).offsetWidth : 280;
-            track.style.paddingRight = Math.max(0, window.innerWidth - cardW) + "px";
-            maxScroll = Math.max(0, track.scrollWidth - window.innerWidth);
-        }
-        setTimeout(setup, 80);
-        window.addEventListener("load", setup);
-        window.addEventListener("resize", function () {
-            setup();
-            if (!locked) { currentX = 0; targetX = 0; if (track) track.style.transform = "translateX(0px)"; }
-        });
-
-        function lerp(a: number, b: number, t: number): number { return a + (b - a) * t; }
-        function tick() {
-            currentX = lerp(currentX, targetX, 0.12);
-            if (Math.abs(currentX - targetX) < 0.2) currentX = targetX;
-            if (track) track.style.transform = "translateX(" + currentX + "px)";
-            if (progBar && maxScroll > 0) progBar.style.width = ((-currentX / maxScroll) * 100).toFixed(1) + "%";
-            if (!hintHidden && currentX < -10 && hint) { hint.style.opacity = "0"; hintHidden = true; }
-            requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-
-        function lock() {
-            if (locked) return;
-            locked = true;
-            savedScrollY = window.scrollY;
-            document.body.style.position = "fixed";
-            document.body.style.top = "-" + savedScrollY + "px";
-            document.body.style.left = "0";
-            document.body.style.width = "100%";
-            document.body.style.overflowY = "scroll";
-        }
-        function unlock() {
-            if (!locked) return;
-            locked = false;
-            document.body.style.position = "";
-            document.body.style.top = "";
-            document.body.style.left = "";
-            document.body.style.width = "";
-            document.body.style.overflowY = "";
-            window.scrollTo(0, savedScrollY);
-        }
-
-        new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting && entry.intersectionRatio >= 0.99) { setup(); lock(); }
-            });
-        }, { threshold: 0.99 }).observe(section);
-
-        window.addEventListener("wheel", function (e) {
-            if (!locked) return;
-            e.preventDefault();
-            targetX = Math.min(0, Math.max(-maxScroll, targetX - e.deltaY));
-            if (e.deltaY > 0 && currentX <= -(maxScroll - 1)) { targetX = -maxScroll; unlock(); return; }
-            if (e.deltaY < 0 && currentX >= -1) { targetX = 0; unlock(); return; }
-        }, { passive: false });
-
-        window.addEventListener("touchstart", function (e) { touchStartY = e.touches[0].clientY; }, { passive: true });
-        window.addEventListener("touchend", function (e) {
-            if (!locked) return;
-            var dy = touchStartY - e.changedTouches[0].clientY;
-            if (Math.abs(dy) < 20) return;
-            targetX = Math.min(0, Math.max(-maxScroll, targetX - dy * 1.5));
-            if (dy > 0 && currentX <= -(maxScroll - 1)) { unlock(); return; }
-            if (dy < 0 && currentX >= -1) { unlock(); return; }
-        }, { passive: true });
-
-        window.addEventListener("keydown", function (e) {
-            if (!locked) return;
-            if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-                e.preventDefault();
-                targetX = Math.max(-maxScroll, targetX - 350);
-                if (currentX <= -(maxScroll - 1)) { unlock(); return; }
-            }
-            if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-                e.preventDefault();
-                targetX = Math.min(0, targetX + 350);
-                if (currentX >= -1) { unlock(); return; }
-            }
-        });
-
-        function styleBtn(btn: HTMLElement | null, h: boolean) {
-            if (!btn) return;
-            btn.style.background = h ? "white" : "transparent";
-            btn.style.color = h ? "black" : "white";
-            btn.style.borderColor = h ? "white" : "rgba(255,255,255,0.3)";
-        }
-        if (btnPrev) {
-            btnPrev.addEventListener("mouseenter", function () { styleBtn(btnPrev, true); });
-            btnPrev.addEventListener("mouseleave", function () { styleBtn(btnPrev, false); });
-            btnPrev.addEventListener("click", function () { targetX = Math.min(0, targetX + 350); });
-        }
-        if (btnNext) {
-            btnNext.addEventListener("mouseenter", function () { styleBtn(btnNext, true); });
-            btnNext.addEventListener("mouseleave", function () { styleBtn(btnNext, false); });
-            btnNext.addEventListener("click", function () { targetX = Math.max(-maxScroll, targetX - 350); });
-        }
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        window.addEventListener("load", update);
+        update();
     })();
 </script>

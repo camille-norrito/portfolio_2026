@@ -1,50 +1,37 @@
 ---
 // src/pages/projets/[slug].astro
 import Layout from "../../layouts/Layout.astro";
+import { projets } from "../../data/projets";
 
-export const prerender = false;
+export const prerender = true;
+
+export function getStaticPaths() {
+    return projets.map((p) => ({ params: { slug: p.slug } }));
+}
 
 const { slug } = Astro.params;
-const PB_URL = "http://127.0.0.1:8090";
 
-let projet = null;
-try {
-    const res  = await fetch(`${PB_URL}/api/collections/projects/records?filter=(slug='${slug}')&perPage=1`);
-    const data = await res.json();
-    if (data.items && data.items.length > 0) {
-        const p = data.items[0];
-        projet = {
-            title:         p.title,
-            subtitle:      p.subtitle || null,
-            description:   p.description || null,
-            intention:     p.intention || null,
-            recherches:    p.recherches || null,
-            conception:    p.conception || null,
-            critiques:     p.critiques || null,
-            category:      Array.isArray(p.category) ? p.category : [p.category].filter(Boolean),
-            competences:   Array.isArray(p.competences) ? p.competences : [],
-            hasDetailPage: p.has_detail_page,
-            externalLink:  p.external_link || null,
-            coverUrl:      p.cover ? `${PB_URL}/api/files/${p.collectionId}/${p.id}/${p.cover}` : null,
-            heroImages:    Array.isArray(p.hero_images) ? p.hero_images.map((f: string) => `${PB_URL}/api/files/${p.collectionId}/${p.id}/${f}`) : [],
-            planches:      Array.isArray(p.planches) ? p.planches.map((f: string) => `${PB_URL}/api/files/${p.collectionId}/${p.id}/${f}`) : [],
-        };
-    }
-} catch (e) { console.error(e); }
+const idx = projets.findIndex((p) => p.slug === slug);
+const p = projets[idx];
+const projet = {
+    title:         p.title,
+    subtitle:      p.subtitle || null,
+    description:   p.description || null,
+    intention:     p.intention || null,
+    recherches:    p.recherches || null,
+    conception:    p.conception || null,
+    critiques:     p.critiques || null,
+    category:      p.category,
+    competences:   p.competences,
+    hasDetailPage: p.hasDetailPage,
+    externalLink:  p.externalLink || null,
+    coverUrl:      p.cover,
+    heroImages:    p.heroImages,
+    planches:      p.planches,
+};
 
-if (!projet) return Astro.redirect("/projets");
-
-let nextProjet = null;
-try {
-    const allRes  = await fetch(`${PB_URL}/api/collections/projects/records?sort=order&perPage=50`);
-    const allData = await allRes.json();
-    const all = allData.items || [];
-    const idx = all.findIndex((p: any) => p.slug === slug);
-    if (idx !== -1) {
-        const nextP = all[idx + 1] || all[0];
-        nextProjet = { title: nextP.title, slug: nextP.slug };
-    }
-} catch (e) {}
+const nextP = projets[idx + 1] || projets[0];
+const nextProjet = { title: nextP.title, slug: nextP.slug };
 
 function getYoutubeId(url: string): string | null {
     if (!url) return null;
@@ -66,7 +53,7 @@ const sections = [
 <main style="display:flex;background:#fff;position:relative;">
 
     <!-- ═══════════ GAUCHE fixe (commune aux deux) ═══════════ -->
-    <div id="proj-left" style="position:fixed;top:0;left:0;width:52%;height:100vh;padding:3.5rem 4rem 3rem;display:flex;flex-direction:column;overflow-y:auto;z-index:2;background:#fff;opacity:0;transform:translateX(-20px);transition:opacity 0.8s ease,transform 0.8s ease;">
+    <div id="proj-left" style="position:fixed;top:0;left:var(--sidebar-w);width:calc((100% - var(--sidebar-w)) * 0.52);height:100vh;padding:3.5rem 4rem 3rem;display:flex;flex-direction:column;overflow-y:auto;z-index:2;background:#fff;opacity:0;transform:translateX(-20px);transition:opacity 0.8s ease,transform 0.8s ease;">
 
         <a href="/projets" class="back-link" style="display:inline-flex;align-items:center;gap:0.6rem;font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(38,31,28,0.35);text-decoration:none;transition:color 0.2s;margin-bottom:3rem;">
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7-7"></path></svg>
@@ -154,7 +141,7 @@ const sections = [
     </div>
 
     <!-- Séparateur -->
-    <div id="proj-divider" style="position:fixed;top:0;left:52%;width:1px;height:100vh;background:rgba(38,31,28,0.08);z-index:3;transform:scaleY(0);transform-origin:top;transition:transform 0.8s 0.3s cubic-bezier(0.16,1,0.3,1);"></div>
+    <div id="proj-divider" style="position:fixed;top:0;left:calc(var(--sidebar-w) + (100% - var(--sidebar-w)) * 0.52);width:1px;height:100vh;background:rgba(38,31,28,0.08);z-index:3;transform:scaleY(0);transform-origin:top;transition:transform 0.8s 0.3s cubic-bezier(0.16,1,0.3,1);"></div>
     <div style="flex:0 0 52%;"></div>
 
     <!-- ═══════════ DROITE scrollable ═══════════ -->
@@ -187,7 +174,9 @@ const sections = [
                     <div style="display:flex;flex-direction:column;gap:0;">
                         {projet.planches.map((url: string) => (
                             <div class="planche-item" style="width:100%;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;">
-                                <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />
+                                {url.endsWith(".mp4")
+                                    ? <Fragment><video src={url} autoplay muted loop playsinline class="planche-video" title="Cliquer pour mettre en pause" style="width:100%;display:block;cursor:pointer;"></video><button type="button" class="sound-btn" aria-pressed="false">Activer le son</button></Fragment>
+                                    : <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />}
                             </div>
                         ))}
                     </div>
@@ -213,10 +202,12 @@ const sections = [
                         </div>
                     </div>
                 ) : projet.planches.length > 0 ? (
-                    <div style="display:flex;flex-direction:column;gap:0;">
+                    <div style="display:flex;flex-direction:column;justify-content:center;gap:0;min-height:100vh;background:#0e0c0b;">
                         {projet.planches.map((url: string) => (
                             <div class="planche-item" style="width:100%;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;">
-                                <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />
+                                {url.endsWith(".mp4")
+                                    ? <Fragment><video src={url} autoplay muted loop playsinline class="planche-video" title="Cliquer pour mettre en pause" style="width:100%;display:block;cursor:pointer;"></video><button type="button" class="sound-btn" aria-pressed="false">Activer le son</button></Fragment>
+                                    : <img src={url} alt="" style="width:100%;display:block;" loading="lazy" />}
                             </div>
                         ))}
                     </div>
@@ -238,7 +229,7 @@ const sections = [
 
 <style>
     .back-link:hover { color: #261F1C !important; }
-    .cta-btn:hover   { background: #B50D0B !important; }
+    .cta-btn:hover   { background: #c3ef5c !important; color: #1e1b1f !important; }
     .next-btn {
         width: 40px; height: 40px; border-radius: 50%;
         border: 1.5px solid #261F1C; display: flex;
@@ -246,13 +237,35 @@ const sections = [
         text-decoration: none; color: #261F1C;
         transition: background 0.2s, color 0.2s; margin-top: 0.2rem;
     }
-    .next-btn:hover { background: #261F1C; color: white; }
-    .next-btn:hover svg { stroke: white; }
+    .next-btn:hover { background: #c3ef5c; border-color: #c3ef5c; color: #1e1b1f; }
+    .next-btn:hover svg { stroke: #1e1b1f; }
     #proj-left::-webkit-scrollbar { width: 0; }
     #proj-left { scrollbar-width: none; }
     .tab-btn:hover { color: #261F1C !important; }
     .tab-scroll::-webkit-scrollbar { width: 0; }
     .tab-scroll { scrollbar-width: none; }
+    .planche-item { position: relative; }
+    .sound-btn {
+        position: absolute; right: 1rem; bottom: 1rem;
+        font-family: 'Montserrat'; font-size: 9px; font-weight: 700;
+        letter-spacing: 0.15em; text-transform: uppercase;
+        color: #fff; background: rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.35); border-radius: 30px;
+        padding: 8px 14px; cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: background 0.2s;
+    }
+    .sound-btn:hover { background: rgba(0,0,0,0.7); }
+    .planche-item.is-paused::after {
+        content: "";
+        position: absolute; top: 50%; left: 50%;
+        width: 72px; height: 72px; margin: -36px 0 0 -36px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E") center / 26px no-repeat;
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255,255,255,0.35);
+        pointer-events: none;
+    }
 </style>
 
 <script>
@@ -320,6 +333,28 @@ const sections = [
                 }
             });
         }, { threshold: 0.25, rootMargin: "0px 0px -10% 0px" }).observe(el);
+    });
+
+    // ── VIDÉOS DES PLANCHES : pause / lecture au clic ──
+    document.querySelectorAll(".planche-video").forEach(function (el) {
+        var vid = el as HTMLVideoElement;
+        vid.addEventListener("click", function () {
+            if (vid.paused) vid.play();
+            else vid.pause();
+        });
+        vid.addEventListener("play", function () { vid.parentElement?.classList.remove("is-paused"); });
+        vid.addEventListener("pause", function () { vid.parentElement?.classList.add("is-paused"); });
+
+        var soundBtn = vid.parentElement?.querySelector(".sound-btn");
+        if (soundBtn) {
+            var btn = soundBtn as HTMLButtonElement;
+            btn.addEventListener("click", function () {
+                vid.muted = !vid.muted;
+                if (!vid.muted && vid.paused) vid.play();
+                btn.textContent = vid.muted ? "Activer le son" : "Couper le son";
+                btn.setAttribute("aria-pressed", vid.muted ? "false" : "true");
+            });
+        }
     });
 
     // ── PLANCHES REVEAL ───────────────────────

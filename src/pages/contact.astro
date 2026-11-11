@@ -1,11 +1,12 @@
 ---
 // src/pages/contact.astro
 import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { encode } from "html-entities";
 
-const PB_URL = "http://127.0.0.1:8090";
 const BREVO_API_KEY = import.meta.env.BREVO_API_KEY;
+const BREVO_SENDER =
+    import.meta.env.BREVO_SENDER || "camille.norrito@edu.univ-fcomte.fr";
 
 let formSent = false;
 let formError = false;
@@ -18,20 +19,16 @@ if (Astro.request.method === "POST") {
         const email = formData.get("email")?.toString().trim() || "";
         const message = formData.get("message")?.toString().trim() || "";
 
-        // 1. Sauvegarder dans PocketBase
-        await fetch(`${PB_URL}/api/collections/contacts/records`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                firstname: prenom,
-                lastname: nom,
-                email,
-                message,
-            }),
-        });
+        // Envoyer l'email via Brevo
+        if (!BREVO_API_KEY) throw new Error("BREVO_API_KEY manquante");
 
-        // 2. Envoyer l'email via Brevo
-        await fetch("https://api.brevo.com/v3/smtp/email", {
+        const safe = {
+            nom: encode(`${prenom} ${nom}`),
+            email: encode(email),
+            message: encode(message),
+        };
+
+        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -40,11 +37,11 @@ if (Astro.request.method === "POST") {
             body: JSON.stringify({
                 sender: {
                     name: "Portfolio Contact",
-                    email: "camille.norrito@edu.univ-fcomte.fr",
+                    email: BREVO_SENDER,
                 },
                 to: [
                     {
-                        email: "camille.norrito@edu.univ-fcomte.fr",
+                        email: "camillenorrito.pro@gmail.com",
                         name: "Camille Norrito",
                     },
                 ],
@@ -53,15 +50,17 @@ if (Astro.request.method === "POST") {
                 htmlContent: `
                     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;">
                         <h2 style="color:#261F1C;margin-bottom:1rem;">Nouveau message depuis ton portfolio</h2>
-                        <p><strong>Nom :</strong> ${prenom} ${nom}</p>
-                        <p><strong>Email :</strong> <a href="mailto:${email}">${email}</a></p>
+                        <p><strong>Nom :</strong> ${safe.nom}</p>
+                        <p><strong>Email :</strong> <a href="mailto:${safe.email}">${safe.email}</a></p>
                         <hr style="border:none;border-top:1px solid #eee;margin:1.5rem 0;" />
                         <p><strong>Message :</strong></p>
-                        <p style="white-space:pre-wrap;color:#444;">${message}</p>
+                        <p style="white-space:pre-wrap;color:#444;">${safe.message}</p>
                     </div>
                 `,
             }),
         });
+
+        if (!res.ok) throw new Error(`Brevo ${res.status}: ${await res.text()}`);
 
         formSent = true;
     } catch (e) {
@@ -72,7 +71,6 @@ if (Astro.request.method === "POST") {
 ---
 
 <Layout title="Contact - Camille Norrito">
-    <Header />
 
     <main class="bg-white">
         <div class="pt-28 md:pt-32">
@@ -98,11 +96,11 @@ if (Astro.request.method === "POST") {
                             +(33) 7 68 63 94 49
                         </a>
                         <a
-                            href="mailto:camille.norrito@edu.univ-fcomte.fr"
+                            href="mailto:camillenorrito.pro@gmail.com"
                             class="text-brown hover:text-red transition-colors block"
                             style="font-family:'Montserrat';font-size:25px;font-weight:600;"
                         >
-                            camille.norrito@edu.univ-fcomte.fr
+                            camillenorrito.pro@gmail.com
                         </a>
                     </div>
                 </div>
@@ -179,7 +177,7 @@ if (Astro.request.method === "POST") {
                                     <div class="pt-4">
                                         <button
                                             type="submit"
-                                            class="bg-[#261F1C] text-white px-6 py-3 rounded-full hover:bg-[#B50D0B] transition-colors duration-300 uppercase cursor-pointer"
+                                            class="bg-[#261F1C] text-white px-6 py-3 rounded-full hover:bg-[#c3ef5c] hover:text-[#1e1b1f] transition-colors duration-300 uppercase cursor-pointer"
                                             style="font-family:'Montserrat';font-size:13px;font-weight:600;letter-spacing:0.1em;"
                                         >
                                             ENVOYER

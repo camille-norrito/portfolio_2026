@@ -1,0 +1,204 @@
+---
+// src/components/ScrollIntro.astro
+import videoSrc from "../assets/portfolio2.mp4";
+---
+
+<script is:inline>document.documentElement.classList.add("intro-active");</script>
+
+<section id="intro" class="intro">
+    <div class="intro-sticky">
+        <h2 id="intro-text" class="intro-text" aria-label="Camille's Website">
+            <span>Camille's</span>
+            <span>Website</span>
+        </h2>
+
+        <div id="intro-video" class="intro-video">
+            <video id="intro-frames" src={videoSrc} muted playsinline preload="auto"></video>
+            <video id="intro-header" class="intro-header" src="/header.mp4" poster="/image-hero.JPG" muted loop playsinline preload="auto" aria-hidden="true"></video>
+        </div>
+
+        <div id="intro-hint" class="intro-hint" aria-hidden="true">
+            <span>Scroll</span>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>
+        </div>
+    </div>
+</section>
+
+<style>
+    .intro {
+        position: relative;
+        height: 400vh;
+        background: #fff;
+        margin-left: calc(-1 * var(--sidebar-w));
+        width: calc(100% + var(--sidebar-w));
+    }
+    .intro-sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .intro-text {
+        position: absolute;
+        z-index: 2;
+        top: 50%;
+        left: 50%;
+        display: flex;
+        justify-content: center;
+        margin: 0;
+        font-family: "Montserrat", sans-serif;
+        font-weight: 500;
+        font-size: clamp(20px, 4.2vw, 56px);
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: #261f1c;
+        white-space: nowrap;
+        transform: translate(-50%, -50%);
+        gap: clamp(110px, 24vw, 360px);
+        animation: intro-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+
+    .intro-video {
+        position: relative;
+        z-index: 1;
+        width: clamp(90px, 22vw, 320px);
+        height: clamp(90px, 22vw, 320px);
+        overflow: hidden;
+        animation: intro-video-in 0.8s 0.2s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+    .intro-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .intro-video .intro-header {
+        position: absolute;
+        inset: 0;
+        transform: translateY(100%);
+        will-change: transform;
+    }
+
+    .intro-hint {
+        position: absolute;
+        z-index: 2;
+        bottom: 2rem;
+        left: 50%;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "Montserrat";
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(38, 31, 28, 0.45);
+        transform: translateX(-50%);
+        transition: opacity 0.3s;
+    }
+
+    @keyframes intro-in {
+        from { opacity: 0; transform: translate(-50%, -20%); }
+        to   { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    @keyframes intro-video-in {
+        from { opacity: 0; transform: scaleY(0.2); }
+        to   { opacity: 1; transform: scaleY(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .intro-text,
+        .intro-video {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        var section = document.getElementById("intro");
+        var box = document.getElementById("intro-video");
+        var text = document.getElementById("intro-text");
+        var hint = document.getElementById("intro-hint");
+        var header = document.getElementById("intro-header") as HTMLVideoElement | null;
+        if (!section || !box || !text) return;
+        var s = section, v = box, t = text;
+
+        // Début de la dernière photo de portfolio2.mp4
+        var LAST_PHOTO_START = 6.45;
+
+        function lerp(a: number, b: number, k: number) { return a + (b - a) * k; }
+        function clamp01(x: number) { return Math.min(1, Math.max(0, x)); }
+        function step(p: number, from: number, to: number) {
+            var k = clamp01((p - from) / (to - from));
+            return k * k * (3 - 2 * k);
+        }
+
+        // Photos au scroll
+        var frames = document.getElementById("intro-frames") as HTMLVideoElement | null;
+        var target = 0;
+        var seeking = false;
+        function seekTo() {
+            if (!frames || seeking) return;
+            if (Math.abs(frames.currentTime - target) < 0.03) return;
+            seeking = true;
+            frames.currentTime = target;
+        }
+
+        var ticking = false;
+        function update() {
+            ticking = false;
+            var W = s.clientWidth;
+            var H = window.innerHeight;
+            var total = s.offsetHeight - H;
+            var p = total > 0 ? clamp01(-s.getBoundingClientRect().top / total) : 1;
+
+            // Carré → rectangle → plein écran
+            var sq = Math.max(90, Math.min(320, W * 0.22));
+            var rectW = Math.min(900, W * 0.7);
+            var rectH = Math.min(600, H * 0.7);
+            var a = step(p, 0, 0.35);
+            var b = step(p, 0.35, 0.8);
+            var w = lerp(lerp(sq, rectW, a), W, b);
+            var h = lerp(lerp(sq, rectH, a), H, b);
+            v.style.width = w + "px";
+            v.style.height = h + "px";
+
+            t.style.gap = w + 32 + "px";
+            t.style.opacity = String(1 - step(p, 0.15, 0.35));
+            if (hint) hint.style.opacity = p > 0.02 ? "0" : "1";
+
+            if (frames && frames.duration) {
+                target = clamp01(p / 0.6) * Math.min(LAST_PHOTO_START, frames.duration - 0.05);
+                seekTo();
+            }
+
+            // Vidéo Header
+            var up = step(p, 0.6, 0.72);
+            if (header) {
+                header.style.transform = "translateY(" + (1 - up) * 100 + "%)";
+                if (up > 0 && header.paused) header.play().catch(function () {});
+                else if (up === 0 && !header.paused) header.pause();
+            }
+
+            // Barre latérale
+            document.documentElement.classList.toggle("intro-active", p < 0.99);
+        }
+
+        if (frames) {
+            var f = frames;
+            f.addEventListener("seeked", function () { seeking = false; seekTo(); });
+            f.addEventListener("loadedmetadata", update);
+            f.play().then(function () { f.pause(); update(); }).catch(function () {});
+        }
+        function onScroll() {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
+        update();
+    })();
+</script>

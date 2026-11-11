@@ -6,6 +6,9 @@
 /* Import de Aboreto depuis Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Aboreto&display=swap');
 
+/* Anton : capitales condensées de la section « Qui suis-je » */
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
 
 
 @font-face {
@@ -78,6 +81,11 @@ h4 {
     font-weight: 700;
     font-size: 18px;
     line-height: 21.9px;
+}
+
+.font-horizon {
+    font-family: 'Horizon';
+    font-weight: 700;
 }
 
 .numero-1 {

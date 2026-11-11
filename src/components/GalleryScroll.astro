@@ -1,32 +1,15 @@
 ---
 // src/components/GalleryScroll.astro
-const PB_URL = "http://127.0.0.1:8090";
+import { galleries as allGalleries } from "../data/galleries";
 
-let galleries = [];
-try {
-    const res = await fetch(
-        `${PB_URL}/api/collections/galleries/records?sort=order&perPage=50`,
-    );
-    const data = await res.json();
-    galleries = data.items
-        .map((g: any) => {
-            // Prendre les 2 premières photos
-            const photos = (g.photos || [])
-                .slice(0, 2)
-                .map(
-                    (f: string) =>
-                        `${PB_URL}/api/files/${g.collectionId}/${g.id}/${f}`,
-                );
-            return {
-                title: g.title,
-                slug: g.slug,
-                photos,
-            };
-        })
-        .filter((g: any) => g.photos.length > 0);
-} catch (e) {
-    console.error("Erreur fetch galleries:", e);
-}
+const galleries = allGalleries
+    .map((g) => ({
+        title: g.title,
+        slug: g.slug,
+        // Prendre les 2 premières photos
+        photos: g.photos.slice(0, 2),
+    }))
+    .filter((g) => g.photos.length > 0);
 
 // Répartir les galleries en 2 colonnes
 const col1 = galleries.filter((_: any, i: number) => i % 2 === 0);
@@ -44,22 +27,11 @@ const col2 = galleries.filter((_: any, i: number) => i % 2 === 1);
             style="flex:0 0 42%;height:100vh;padding:5rem 4rem;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(38,31,28,0.08);"
         >
             <div>
-                <p
-                    style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.3em;color:#B50D0B;text-transform:uppercase;margin-bottom:1.5rem;"
-                >
-                    ✦ MES GALERIES
-                </p>
                 <h2
                     style="font-family:'Montserrat';font-size:clamp(36px,5vw,72px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:2rem;"
                 >
                     Voyages &amp;<br /> Photographies
                 </h2>
-                <p
-                    style="font-family:'Montserrat';font-size:13px;line-height:1.9;color:rgba(38,31,28,0.55);max-width:340px;"
-                >
-                    Une sélection de photos prises lors de mes voyages et
-                    shootings — Toronto, Vancouver, Bali, Maroc, New York...
-                </p>
             </div>
 
             <a
@@ -166,10 +138,33 @@ const col2 = galleries.filter((_: any, i: number) => i % 2 === 1);
 
 <style>
     .gs-cta:hover {
-        background: #b50d0b !important;
+        background: #c3ef5c !important;
+        color: #1e1b1f !important;
     }
     .gs-card:hover .gs-img {
         transform: scale(1.03);
+    }
+
+    /* Mobile : texte au-dessus, photos en dessous */
+    @media (max-width: 767px) {
+        #gallery-scroll-section {
+            flex-direction: column;
+        }
+        #gs-left {
+            flex: none !important;
+            height: auto !important;
+            padding: 2rem 1rem 1.5rem !important;
+            gap: 1.25rem;
+            border-right: none !important;
+            border-bottom: 1px solid rgba(38, 31, 28, 0.08);
+        }
+        #gs-left h2 {
+            font-size: 30px !important;
+            margin-bottom: 1rem !important;
+        }
+        #gs-left + div {
+            min-height: 0;
+        }
     }
 </style>
 
