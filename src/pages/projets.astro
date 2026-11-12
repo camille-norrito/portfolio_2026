@@ -19,6 +19,10 @@ const rows = categories
 
         <!-- INTRO -->
         <section class="pj-hero">
+            <div id="pj-hint" class="pj-hint" aria-hidden="true">
+                <span>Scroll</span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>
+            </div>
             <div class="pj-grid pj-hero-top">
                 <h1 class="pj-page-title">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -31,7 +35,7 @@ const rows = categories
                 <div class="pj-hero-meta">
                     <p>Étudiante en 3ème année de BUT MMI à Montbéliard, entre design graphique, branding et motion design.</p>
                     <p>Du concept à la direction artistique finale, chaque projet part d'une intention.</p>
-                    <p class="pj-hero-date">Showreel<br />2027</p>
+                    <p class="pj-hero-date">Showreel<br />2026</p>
                 </div>
             </div>
         </section>
@@ -68,7 +72,7 @@ const rows = categories
                     <a href={"/gallery/" + g.slug} class="pj-gal-card">
                         {(g.cover || g.photos[0]) && <img src={g.cover || g.photos[0]} alt="" loading="lazy" />}
                         <div class="pj-gal-content">
-                            <p class="pj-gal-brand">Camille Norrito<br />Galerie photo</p>
+                            <p class="pj-gal-brand">Galerie photo</p>
                             <p class="pj-gal-title">{g.title}</p>
                             <p class="pj-gal-count">{g.photos.length} photos</p>
                         </div>
@@ -78,6 +82,13 @@ const rows = categories
         </section>
     </div>
 </Layout>
+
+<style is:global>
+    /* Fond noir identique au footer : pas d'ombre entre la page et le footer */
+    main {
+        box-shadow: none !important;
+    }
+</style>
 
 <style>
     .pj-page {
@@ -139,6 +150,38 @@ const rows = categories
         display: flex;
         flex-direction: column;
         padding-top: 1.75rem;
+    }
+
+    /* Indication « Scroll » en bas de la vidéo d'arrivée */
+    .pj-hint {
+        position: absolute;
+        left: 50%;
+        bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--pj-text);
+        transform: translateX(-50%);
+        transition: opacity 0.4s;
+        pointer-events: none;
+    }
+    .pj-hint svg {
+        animation: pj-hint-bounce 1.6s ease-in-out infinite;
+    }
+    @keyframes pj-hint-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .pj-hint svg { animation: none; }
+    }
+    @media (max-width: 767px) {
+        .pj-hint { bottom: 1.5rem; }
     }
     .pj-page-title {
         display: flex;
@@ -348,6 +391,7 @@ const rows = categories
 <script>
     (function () {
         var reel = document.getElementById("pj-reel");
+        var hint = document.getElementById("pj-hint");
         var video = document.getElementById("pj-reel-video") as HTMLVideoElement | null;
         if (!reel || !video) return;
         var r = reel, v = video;
@@ -361,6 +405,7 @@ const rows = categories
         function update() {
             var progress = Math.min(1, window.scrollY / (window.innerHeight * 0.8));
             r.style.opacity = String(1 - progress);
+            if (hint) hint.style.opacity = window.scrollY > 40 ? "0" : "1";
             var hidden = progress >= 1;
             r.style.visibility = hidden ? "hidden" : "visible";
             if (hidden && !v.paused) v.pause();

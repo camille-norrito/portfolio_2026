@@ -236,7 +236,7 @@ export const projets: Projet[] = [
         planches: [],
     },
     {
-        title: "Showreel 2027",
+        title: "Showreel 2026",
         slug: "showreel-2027",
         subtitle: "Retour sur mes projets 2026",
         description: "Affiches, direction artistique, vidéo, montage, UI/UX, photographie… Une année à concrétiser des projets, de Montréal à Toulon, pour des marques, des clubs et bien plus encore.",

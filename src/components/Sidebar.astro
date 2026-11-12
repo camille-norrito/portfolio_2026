@@ -59,6 +59,21 @@ const cards = projets.map((p) => ({
     </a>
 </nav>
 
+<!-- MOBILE : bouton burger + menu plein écran -->
+<button type="button" id="mnav-btn" class="mnav-btn" aria-expanded="false" aria-controls="mnav" aria-label="Ouvrir le menu">
+    <span></span><span></span><span></span>
+</button>
+<nav id="mnav" class="mnav" aria-label="Menu" aria-hidden="true">
+    <ul class="mnav-list">
+        <li><a href="/" data-path="/">Accueil</a></li>
+        <li><a href="/projets" data-path="/projets">Projets</a></li>
+        <li><a href="/projets#galerie" data-path="/gallery">Galerie</a></li>
+        <li><a href="/cv.pdf" download="CV_Camille_Norrito_Stage_2027.pdf">CV</a></li>
+        <li><a href="/contact" data-path="/contact">Contact</a></li>
+    </ul>
+    <a href="mailto:camillenorrito.pro@gmail.com" class="mnav-mail">camillenorrito.pro@gmail.com</a>
+</nav>
+
 <!-- PANNEAU PROJETS -->
 <div id="sb-panel-projets" class="sb-panel" role="dialog" aria-label="Projets" aria-hidden="true">
     <div class="sb-panel-head">
@@ -124,12 +139,9 @@ const cards = projets.map((p) => ({
         :root {
             --sidebar-w: 0px;
         }
-        body {
-            padding-bottom: 72px;
-        }
     }
 
-    /* Barre cachée pendant l'intro de la landing */
+    /* Barre et bouton burger cachés pendant l'intro de la landing */
     #sidebar {
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -140,17 +152,21 @@ const cards = projets.map((p) => ({
         visibility: hidden !important;
         opacity: 0 !important;
     }
-    @media (max-width: 767px) {
-        html.intro-active #sidebar {
-            transform: translateY(100%);
-        }
+    html.intro-active .mnav-btn {
+        opacity: 0;
+        pointer-events: none;
+    }
+    html.mnav-open {
+        overflow: hidden;
     }
 </style>
 
 <style>
     /* Couleurs du menu */
     #sidebar,
-    .sb-panel {
+    .sb-panel,
+    .mnav-btn,
+    .mnav {
         --c-bg: #1e1b1f;
         --c-surface: #2b282c;
         --c-ink: #f4f2f5;
@@ -349,33 +365,118 @@ const cards = projets.map((p) => ({
         text-overflow: ellipsis;
     }
 
-    /* ── Mobile : barre en bas ── */
+    /* ── Menu burger (mobile) ── */
+    .mnav-btn,
+    .mnav {
+        display: none;
+    }
     @media (max-width: 767px) {
-        #sidebar {
-            top: auto;
-            right: 0;
-            width: auto;
-            height: 72px;
-            flex-direction: row;
-            justify-content: space-around;
-            gap: 0;
-            border-right: none;
-            border-top: 1px solid rgba(244, 242, 245, 0.08);
-        }
-        .sb-item {
-            padding: 0.4rem 0;
-        }
+        #sidebar,
         .sb-panel {
-            top: auto;
-            left: 12px;
-            right: 12px;
-            bottom: 84px;
-            width: auto;
-            max-height: 75vh;
-            transform: translateY(12px);
+            display: none;
         }
-        .sb-panel.is-open {
+
+        .mnav-btn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 71;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border-radius: 50%;
+            border: 1px solid rgba(244, 242, 245, 0.25);
+            background: var(--c-bg);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            transition: opacity 0.4s;
+        }
+        .mnav-btn span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--c-ink);
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        /* ☰ devient ✕ quand le menu est ouvert */
+        .mnav-btn[aria-expanded="true"] span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .mnav-btn[aria-expanded="true"] span:nth-child(2) {
+            opacity: 0;
+        }
+        .mnav-btn[aria-expanded="true"] span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+        .mnav-btn:focus-visible {
+            outline: 2px solid var(--c-accent);
+            outline-offset: 3px;
+        }
+
+        .mnav {
+            position: fixed;
+            inset: 0;
+            z-index: 70;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 5rem 1.75rem 2.5rem;
+            background: var(--c-bg);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+        .mnav.is-open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+        .mnav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .mnav-list a {
+            display: inline-block;
+            font-family: "Montserrat";
+            font-size: 38px;
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+            color: var(--c-ink);
+            text-decoration: none;
+            transform: translateY(12px);
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease, color 0.2s;
+        }
+        .mnav.is-open .mnav-list a {
             transform: translateY(0);
+            opacity: 1;
+        }
+        .mnav.is-open .mnav-list li:nth-child(2) a { transition-delay: 0.04s; }
+        .mnav.is-open .mnav-list li:nth-child(3) a { transition-delay: 0.08s; }
+        .mnav.is-open .mnav-list li:nth-child(4) a { transition-delay: 0.12s; }
+        .mnav.is-open .mnav-list li:nth-child(5) a { transition-delay: 0.16s; }
+        .mnav-list a.is-active,
+        .mnav-list a:active {
+            color: var(--c-accent);
+        }
+        .mnav-mail {
+            margin-top: 2.5rem;
+            font-family: "Montserrat";
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(244, 242, 245, 0.6);
+            text-decoration: none;
         }
     }
 </style>
@@ -387,12 +488,38 @@ const cards = projets.map((p) => ({
         if (!sidebar || !projPanel) return;
         var sb = sidebar;
 
-        // Page active
+        // Page active (barre latérale et menu burger)
         var path = window.location.pathname;
-        sb.querySelectorAll("[data-path]").forEach(function (el) {
+        document.querySelectorAll("#sidebar [data-path], #mnav [data-path]").forEach(function (el) {
             var p = el.getAttribute("data-path") || "";
             if (p === "/" ? path === "/" : path.startsWith(p)) el.classList.add("is-active");
         });
+
+        // Menu burger (mobile)
+        var mBtn = document.getElementById("mnav-btn");
+        var mNav = document.getElementById("mnav");
+        if (mBtn && mNav) {
+            var mb = mBtn, mn = mNav;
+            var setMenu = function (open: boolean) {
+                mn.classList.toggle("is-open", open);
+                mn.setAttribute("aria-hidden", open ? "false" : "true");
+                mb.setAttribute("aria-expanded", open ? "true" : "false");
+                mb.setAttribute("aria-label", open ? "Fermer le menu" : "Ouvrir le menu");
+                document.documentElement.classList.toggle("mnav-open", open);
+            };
+            mb.addEventListener("click", function () {
+                setMenu(mb.getAttribute("aria-expanded") !== "true");
+            });
+            mn.querySelectorAll("a").forEach(function (a) {
+                a.addEventListener("click", function () { setMenu(false); });
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" && mn.classList.contains("is-open")) {
+                    setMenu(false);
+                    mb.focus();
+                }
+            });
+        }
 
         // Panneaux
         var toggles = Array.prototype.slice.call(sb.querySelectorAll(".sb-toggle")) as HTMLElement[];

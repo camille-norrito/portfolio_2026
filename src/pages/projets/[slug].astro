@@ -63,14 +63,14 @@ const sections = [
             Retour
         </a>
 
-        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem;">
+        <h1 style="font-family:'Horizon';font-size:clamp(32px,4.5vw,62px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:0.6rem;">{projet.title}</h1>
+        {projet.subtitle && <p style="font-family:'Montserrat';font-size:11px;letter-spacing:0.12em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin-bottom:1rem;">{projet.subtitle}</p>}
+
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.75rem;">
             {projet.category.map((cat: string) => (
-                <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#1e1b1f;background:#C3EF5C;text-transform:uppercase;border:1px solid #C3EF5C;padding:3px 8px;">{cat}</span>
+                <span style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.2em;color:#1e1b1f;background:#C3EF5C;text-transform:uppercase;border:1px solid #C3EF5C;padding:4px 11px;border-radius:30px;">{cat}</span>
             ))}
         </div>
-
-        <h1 style="font-family:'Horizon';font-size:clamp(32px,4.5vw,62px);color:#261F1C;text-transform:uppercase;letter-spacing:-0.02em;line-height:0.9;margin-bottom:0.6rem;">{projet.title}</h1>
-        {projet.subtitle && <p style="font-family:'Montserrat';font-size:11px;letter-spacing:0.12em;color:rgba(38,31,28,0.4);text-transform:uppercase;margin-bottom:1.75rem;">{projet.subtitle}</p>}
         <div style="width:32px;height:1px;background:#C3EF5C;margin-bottom:1.75rem;"></div>
         {projet.description && <p style="font-family:'Montserrat';font-size:12px;line-height:1.9;color:rgba(38,31,28,0.6);margin-bottom:2rem;">{projet.description}</p>}
 
@@ -115,7 +115,7 @@ const sections = [
                 <p style="font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:0.25em;color:rgba(38,31,28,0.3);text-transform:uppercase;margin-bottom:0.75rem;">Compétences</p>
                 <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
                     {projet.competences.map((comp: string) => (
-                        <span style="font-family:'Montserrat';font-size:9px;letter-spacing:0.08em;color:#261F1C;border:1px solid rgba(38,31,28,0.15);padding:3px 8px;">{comp}</span>
+                        <span style="font-family:'Montserrat';font-size:9px;letter-spacing:0.08em;color:#261F1C;border:1px solid rgba(38,31,28,0.15);padding:4px 11px;border-radius:30px;">{comp}</span>
                     ))}
                 </div>
             </div>
@@ -237,6 +237,28 @@ const sections = [
                 )}
             </div>
         )}
+
+        <!-- Mobile : navigation précédent / suivant après les images -->
+        <div class="proj-nav proj-nav-end">
+            <a href={"/projets/" + prevProjet.slug} class="proj-nav-link" aria-label={"Projet précédent : " + prevProjet.title}>
+                <span class="next-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                </span>
+                <span class="proj-nav-text">
+                    <span class="proj-nav-label">Précédent</span>
+                    <span class="proj-nav-title">{prevProjet.title}</span>
+                </span>
+            </a>
+            <a href={"/projets/" + nextProjet.slug} class="proj-nav-link proj-nav-next" aria-label={"Projet suivant : " + nextProjet.title}>
+                <span class="proj-nav-text">
+                    <span class="proj-nav-label">Suivant</span>
+                    <span class="proj-nav-title">{nextProjet.title}</span>
+                </span>
+                <span class="next-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                </span>
+            </a>
+        </div>
     </div>
 
 </main>
@@ -262,6 +284,17 @@ const sections = [
         .yt-trigger { height: 56vw !important; }
         .proj-solo { min-height: 0 !important; }
         .proj-nav .proj-nav-title { white-space: normal; }
+        /* navigation discrète après les images */
+        .proj-main .proj-nav.proj-nav-end {
+            display: flex;
+            margin: 0;
+            padding: 1.25rem 1.25rem 1.5rem;
+            background: #f5f0ea;
+            border-top: none;
+        }
+        .proj-main .proj-nav-end .next-btn { width: 32px; height: 32px; }
+        .proj-main .proj-nav-end .proj-nav-label { font-size: 7px; }
+        .proj-main .proj-nav-end .proj-nav-title { font-size: 9px; }
     }
 
     .back-link:hover { color: #261F1C !important; }
@@ -292,6 +325,8 @@ const sections = [
         text-decoration: none;
     }
     .proj-nav-next { text-align: right; }
+    /* la navigation après les images n'existe que sur mobile */
+    .proj-nav.proj-nav-end { display: none; }
     .proj-nav-text {
         display: flex;
         flex-direction: column;
