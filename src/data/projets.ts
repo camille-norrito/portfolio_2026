@@ -18,6 +18,8 @@ export interface Projet {
     planches: string[];
     // Texte du bouton vers le lien externe (par défaut « Voir le projet »)
     ctaLabel?: string;
+    // Lecteur Spotify (adresse « embed ») affiché au-dessus des images
+    spotifyEmbed?: string;
 }
 
 // Catégories du site
@@ -257,6 +259,35 @@ export const projets: Projet[] = [
         cover: "/assets/projets/showreel-2027/cover.webp",
         heroImages: [],
         planches: ["/showreel-2027.mp4"],
+    },
+    {
+        title: "En Coloc",
+        slug: "en-coloc",
+        subtitle: "Podcast",
+        description: "En Coloc, c'est le podcast qu'on a lancé avec Lison à notre retour de six mois d'échange universitaire à Montréal. On y revient sur notre expérience pour aider les étudiants de notre IUT qui veulent eux aussi partir à l'étranger : les démarches, les aides et toutes les questions qu'on se pose avant le départ.",
+        intention: "",
+        recherches: "",
+        conception: "",
+        critiques: "",
+        category: [
+            "Production audiovisuelle & motion design",
+        ],
+        competences: [
+            "Podcast",
+            "Montage vidéo",
+            "Sound design",
+        ],
+        hasDetailPage: true,
+        externalLink: "",
+        cover: "/assets/projets/en-coloc/encoloc1.jpg",
+        heroImages: [],
+        planches: [
+            "/assets/projets/en-coloc/encoloc1.jpg",
+            "/assets/projets/en-coloc/encoloc2.jpg",
+            "/assets/projets/en-coloc/encoloc3.jpg",
+            "/assets/projets/en-coloc/encoloc4.jpg",
+        ],
+        spotifyEmbed: "https://open.spotify.com/embed/episode/00t9xfag69FwqGovLHFRYQ/video?utm_source=generator",
     },
     {
         title: "A la fut",

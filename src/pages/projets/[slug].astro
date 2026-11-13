@@ -26,6 +26,7 @@ const projet = {
     hasDetailPage: p.hasDetailPage,
     externalLink:  p.externalLink || null,
     ctaLabel:      p.ctaLabel || "Voir le projet",
+    spotifyEmbed:  p.spotifyEmbed || null,
     coverUrl:      p.cover,
     heroImages:    p.heroImages,
     planches:      p.planches,
@@ -73,6 +74,19 @@ const sections = [
         </div>
         <div style="width:32px;height:1px;background:#C3EF5C;margin-bottom:1.75rem;"></div>
         {projet.description && <p style="font-family:'Montserrat';font-size:12px;line-height:1.9;color:rgba(38,31,28,0.6);margin-bottom:2rem;">{projet.description}</p>}
+
+        <!-- Lecteur Spotify (épisode de podcast) sous la description -->
+        {projet.spotifyEmbed && (
+            <div class="proj-embed">
+                <iframe
+                    src={projet.spotifyEmbed}
+                    title={`${projet.title} sur Spotify`}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"
+                ></iframe>
+            </div>
+        )}
 
         <!-- ── VERSION AVEC DÉTAILS : tabs ── -->
         {projet.hasDetailPage && sections.length > 0 && (
@@ -163,9 +177,9 @@ const sections = [
     <div id="proj-right" style="flex:1;min-height:100vh;opacity:0;transition:opacity 0.8s 0.2s ease;">
 
         {projet.hasDetailPage ? (
-            <!-- ── DROITE AVEC DÉTAILS ── -->
             <div>
-                <!-- 1. Slideshow hero_images -->
+                {/* ── DROITE AVEC DÉTAILS ── */}
+                {/* 1. Slideshow hero_images */}
                 {projet.heroImages.length > 0 && (
                     <div id="hero-slideshow" style="position:relative;width:100%;height:100vh;overflow:hidden;background:#f5f0ea;">
                         {projet.heroImages.map((url: string, i: number) => (
@@ -182,9 +196,8 @@ const sections = [
                     </div>
                 )}
 
-                <!-- Textes supprimés de droite — ils sont dans les tabs à gauche -->
 
-                <!-- 3. Planches moodboard -->
+                {/* 3. Planches moodboard */}
                 {projet.planches.length > 0 && (
                     <div style="display:flex;flex-direction:column;gap:0;">
                         {projet.planches.map((url: string) => (
@@ -198,8 +211,8 @@ const sections = [
                 )}
             </div>
         ) : (
-            <!-- ── DROITE SANS DÉTAILS ── -->
             <div>
+                {/* ── DROITE SANS DÉTAILS ── */}
                 {youtubeId ? (
                     <div class="yt-trigger" style="position:relative;width:100%;height:100vh;cursor:pointer;overflow:hidden;background:#000;">
                         <img src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`} alt={projet.title}
@@ -327,6 +340,22 @@ const sections = [
     .proj-nav-next { text-align: right; }
     /* la navigation après les images n'existe que sur mobile */
     .proj-nav.proj-nav-end { display: none; }
+
+    /* Lecteur Spotify, sous la description */
+    .proj-embed {
+        margin-bottom: 2rem;
+        flex-shrink: 0;
+    }
+    .proj-embed iframe {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 0;
+        border-radius: 12px;
+    }
+    @media (max-width: 767px) {
+
+    }
     .proj-nav-text {
         display: flex;
         flex-direction: column;
