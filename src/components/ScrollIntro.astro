@@ -82,6 +82,13 @@ import videoSrc from "../assets/portfolio2.mp4";
         transform: translateY(100%);
         will-change: transform;
     }
+    /* Mobile : le cadre est placé en JS (pour finir en haut, au format de la vidéo Header) */
+    @media (max-width: 767px) {
+        .intro-sticky {
+            align-items: flex-start;
+            z-index: 5; /* les photos passent devant la section verte qui remonte */
+        }
+    }
 
     .intro-hint {
         position: absolute;
@@ -165,6 +172,25 @@ import videoSrc from "../assets/portfolio2.mp4";
             var w = lerp(lerp(sq, rectW, a), W, b);
             var h = lerp(lerp(sq, rectH, a), H, b);
             v.style.width = w + "px";
+
+            if (W < 768) {
+                // Mobile : photos en plein écran comme avant ; à la toute fin, la vidéo Header
+                // passe au format horizontal en haut de l'écran, et la section suivante remonte
+                // juste en dessous (marge négative = la hauteur libérée)
+                var ratio = header && header.videoWidth ? header.videoWidth / header.videoHeight : 16 / 9;
+                var hv = W / ratio;
+                var k = step(p, 0.9, 0.995);
+                h = lerp(h, hv, k);
+                // Une fois les photos en plein écran, le cadre reste collé en haut
+                v.style.marginTop = (p >= 0.8 ? 0 : (H - h) / 2) + "px";
+                s.style.marginBottom = -(H - hv) + "px";
+                // Derrière la vidéo : vert (comme la section suivante), jamais de blanc
+                s.style.background = p >= 0.72 ? "#c3ef5c" : "";
+            } else {
+                v.style.marginTop = "";
+                s.style.marginBottom = "";
+                s.style.background = "";
+            }
             v.style.height = h + "px";
 
             t.style.gap = w + 32 + "px";
@@ -192,6 +218,7 @@ import videoSrc from "../assets/portfolio2.mp4";
             var f = frames;
             f.addEventListener("seeked", function () { seeking = false; seekTo(); });
             f.addEventListener("loadedmetadata", update);
+            if (header) header.addEventListener("loadedmetadata", update);
             f.play().then(function () { f.pause(); update(); }).catch(function () {});
         }
         function onScroll() {
@@ -200,5 +227,6 @@ import videoSrc from "../assets/portfolio2.mp4";
         window.addEventListener("scroll", onScroll, { passive: true });
         window.addEventListener("resize", onScroll);
         update();
+
     })();
 </script>
