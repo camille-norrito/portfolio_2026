@@ -138,6 +138,12 @@ h4 {
    STYLES DE BASE AVEC VOS COULEURS
    ============================================ */
 
+/* Au-delà de la page (rebond du scroll) : couleur du footer, jamais de blanc */
+html {
+    background-color: #0E0C0B;
+    overscroll-behavior-y: none;
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     color: #000000;
