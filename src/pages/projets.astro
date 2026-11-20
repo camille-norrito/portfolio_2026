@@ -34,15 +34,25 @@ const rows = categories
                 </h1>
                 <div class="pj-hero-meta">
                     <p>Étudiante en 3ème année de BUT MMI à Montbéliard, entre design graphique, branding et motion design.</p>
-                    <p>Du concept à la direction artistique finale, chaque projet part d'une intention.</p>
                     <p class="pj-hero-date">Showreel<br />2026</p>
                 </div>
             </div>
         </section>
 
+        <!-- TRI PAR TYPE DE PROJET -->
+        <nav class="pj-grid pj-filter" aria-label="Trier les projets">
+            <p class="pj-filter-label">Trier</p>
+            <div class="pj-filter-list">
+                <button type="button" class="pj-filter-btn" data-cat="tous" aria-pressed="true">Tous</button>
+                {rows.map((r) => (
+                    <button type="button" class="pj-filter-btn" data-cat={r.key} aria-pressed="false">{r.label}</button>
+                ))}
+            </div>
+        </nav>
+
         <!-- PROJETS PAR CATÉGORIE -->
         {rows.map((r) => (
-            <section class="pj-grid pj-row" id={"cat-" + r.key}>
+            <section class="pj-grid pj-row" id={"cat-" + r.key} data-cat={r.key}>
                 <h2 class="pj-row-label">
                     {r.label}
                     <span>{String(r.projets.length).padStart(2, "0")}</span>
@@ -205,6 +215,7 @@ const rows = categories
         margin: 0;
     }
     .pj-hero-date {
+        grid-column: -2 / -1;
         text-align: right;
     }
     .pj-hero-main {
@@ -218,6 +229,60 @@ const rows = categories
         line-height: 1.2;
         letter-spacing: -0.01em;
         margin: 0;
+    }
+
+    /* ── Tri par type de projet ── */
+    .pj-filter {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        align-items: center;
+        padding: 1.1rem 0;
+        /* fond transparent sur le showreel, puis noir au même rythme que la page (réglé en JS) */
+        background: rgba(14, 12, 11, 0);
+        border-top: 1px solid var(--pj-line);
+    }
+    .pj-filter-label {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--pj-muted);
+    }
+    .pj-filter-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .pj-filter-btn {
+        font-family: "Montserrat", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--pj-text);
+        background: transparent;
+        border: 1px solid rgba(245, 240, 234, 0.25);
+        border-radius: 30px;
+        padding: 7px 16px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .pj-filter-btn:hover {
+        border-color: #c3ef5c;
+    }
+    .pj-filter-btn[aria-pressed="true"] {
+        background: #c3ef5c;
+        border-color: #c3ef5c;
+        color: #1e1b1f;
+    }
+    .pj-filter-btn:focus-visible {
+        outline: 2px solid #c3ef5c;
+        outline-offset: 2px;
+    }
+    .pj-row[hidden] {
+        display: none;
     }
 
     /* ── Rangées ── */
@@ -395,6 +460,7 @@ const rows = categories
         var video = document.getElementById("pj-reel-video") as HTMLVideoElement | null;
         if (!reel || !video) return;
         var r = reel, v = video;
+        var filterBar = document.querySelector(".pj-filter") as HTMLElement | null;
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             v.removeAttribute("autoplay");
@@ -405,6 +471,9 @@ const rows = categories
         function update() {
             var progress = Math.min(1, window.scrollY / (window.innerHeight * 0.8));
             r.style.opacity = String(1 - progress);
+            // barre de tri transparente sur le showreel, noire seulement quand la page l'est déjà :
+            // aucune démarcation (elle ne se colle en haut qu'après la fin du fondu)
+            if (filterBar) filterBar.style.background = progress >= 1 ? "rgb(14, 12, 11)" : "transparent";
             if (hint) hint.style.opacity = window.scrollY > 40 ? "0" : "1";
             var hidden = progress >= 1;
             r.style.visibility = hidden ? "hidden" : "visible";
@@ -415,5 +484,35 @@ const rows = categories
         window.addEventListener("resize", update);
         window.addEventListener("load", update);
         update();
+    })();
+
+    // Tri par type de projet : n'affiche que la catégorie choisie (la galerie reste visible)
+    (function () {
+        var buttons = Array.prototype.slice.call(document.querySelectorAll(".pj-filter-btn")) as HTMLElement[];
+        var rows = Array.prototype.slice.call(document.querySelectorAll(".pj-row[data-cat]")) as HTMLElement[];
+        var filter = document.querySelector(".pj-filter") as HTMLElement | null;
+        function select(cat: string) {
+            buttons.forEach(function (b) {
+                b.setAttribute("aria-pressed", b.getAttribute("data-cat") === cat ? "true" : "false");
+            });
+            rows.forEach(function (r) {
+                r.hidden = cat !== "tous" && r.getAttribute("data-cat") !== cat;
+            });
+        }
+        buttons.forEach(function (b) {
+            b.addEventListener("click", function () {
+                select(b.getAttribute("data-cat") || "tous");
+                // ramène toujours au début des projets affichés, juste sous la barre de tri
+                // (même depuis le bas de la page, où la liste vient de raccourcir)
+                var first = rows.filter(function (r) { return !r.hidden; })[0];
+                if (first && filter) {
+                    var top = first.getBoundingClientRect().top + window.scrollY - filter.offsetHeight;
+                    window.scrollTo({ top: top, behavior: "smooth" });
+                }
+            });
+        });
+        // un lien vers une catégorie (#cat-affiche…) présélectionne le tri
+        var m = window.location.hash.match(/^#cat-(.+)$/);
+        if (m && rows.some(function (r) { return r.getAttribute("data-cat") === m![1]; })) select(m[1]);
     })();
 </script>

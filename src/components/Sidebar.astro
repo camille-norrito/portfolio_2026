@@ -1,23 +1,6 @@
 ---
 // src/components/Sidebar.astro
-import { projets, categories as projetCategories } from "../data/projets";
 import { galleries } from "../data/galleries";
-
-const categories = [
-    { label: "Tous", key: "tous", match: [""] },
-    ...projetCategories,
-];
-
-const cards = projets.map((p) => ({
-    title: p.title.trim(),
-    slug: p.slug,
-    cover: p.cover,
-    subtitle: p.subtitle || p.category[0] || "",
-    cats: categories
-        .filter((c) => p.category.some((cat) => c.match.some((m) => cat.includes(m))))
-        .map((c) => c.key)
-        .join(" "),
-}));
 ---
 
 <nav id="sidebar" aria-label="Navigation principale">
@@ -28,14 +11,14 @@ const cards = projets.map((p) => ({
         <span>Accueil</span>
     </a>
 
-    <button type="button" class="sb-item sb-toggle" data-path="/projets" aria-expanded="false" aria-controls="sb-panel-projets">
+    <a href="/projets" class="sb-item" data-path="/projets">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <rect x="6" y="2.5" width="12" height="2.5" rx="1.25"></rect>
             <rect x="4" y="6.5" width="16" height="2.5" rx="1.25"></rect>
             <rect x="2.5" y="10.5" width="19" height="11" rx="3"></rect>
         </svg>
         <span>Projets</span>
-    </button>
+    </a>
 
     <button type="button" class="sb-item sb-toggle" data-path="/gallery" aria-expanded="false" aria-controls="sb-panel-galerie">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -73,37 +56,6 @@ const cards = projets.map((p) => ({
     </ul>
     <a href="mailto:camillenorrito.pro@gmail.com" class="mnav-mail">camillenorrito.pro@gmail.com</a>
 </nav>
-
-<!-- PANNEAU PROJETS -->
-<div id="sb-panel-projets" class="sb-panel" role="dialog" aria-label="Projets" aria-hidden="true">
-    <div class="sb-panel-head">
-        <span class="sb-panel-title">Projets</span>
-        <a href="/projets" class="sb-panel-all">
-            Tout
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-        </a>
-    </div>
-
-    <div class="sb-tabs" role="tablist">
-        {categories.map((c, i) => (
-            <button type="button" role="tab" class="sb-tab" data-cat={c.key} aria-selected={i === 0 ? "true" : "false"}>
-                {c.label}
-            </button>
-        ))}
-    </div>
-
-    <div class="sb-grid">
-        {cards.map((p) => (
-            <a href={"/projets/" + p.slug} class="sb-card" data-cats={p.cats}>
-                <div class="sb-card-img">
-                    {p.cover && <img src={p.cover} alt={p.title} loading="lazy" />}
-                </div>
-                <p class="sb-card-title">{p.title}</p>
-                {p.subtitle && <p class="sb-card-sub">{p.subtitle}</p>}
-            </a>
-        ))}
-    </div>
-</div>
 
 <!-- PANNEAU GALERIE -->
 <div id="sb-panel-galerie" class="sb-panel" role="dialog" aria-label="Galerie" aria-hidden="true">
@@ -279,36 +231,6 @@ const cards = projets.map((p) => ({
         color: var(--c-accent);
     }
 
-    .sb-tabs {
-        display: flex;
-        gap: 2px;
-        padding: 3px;
-        background: var(--c-surface);
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-    .sb-tabs::-webkit-scrollbar {
-        display: none;
-    }
-    .sb-tab {
-        flex: 1;
-        white-space: nowrap;
-        padding: 0.5rem 0.4rem;
-        border: none;
-        border-radius: 8px;
-        background: none;
-        cursor: pointer;
-        font-family: "Montserrat";
-        font-size: 12px;
-        color: var(--c-ink);
-        transition: background 0.2s;
-    }
-    .sb-tab[aria-selected="true"] {
-        background: var(--c-bg);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
 
     .sb-grid {
         display: grid;
@@ -318,22 +240,6 @@ const cards = projets.map((p) => ({
     .sb-card {
         text-decoration: none;
         color: var(--c-ink);
-    }
-    /* Projets hors catégorie */
-    .sb-card {
-        transition: opacity 0.3s ease;
-    }
-    .sb-card .sb-card-img img {
-        transition: transform 0.4s ease, filter 0.3s ease;
-    }
-    .sb-card.is-dim {
-        opacity: 0.35;
-    }
-    .sb-card.is-dim .sb-card-img img {
-        filter: grayscale(1);
-    }
-    .sb-card.is-dim:hover {
-        opacity: 0.7;
     }
     .sb-card-img {
         aspect-ratio: 1 / 1;
@@ -484,8 +390,7 @@ const cards = projets.map((p) => ({
 <script>
     (function () {
         var sidebar = document.getElementById("sidebar");
-        var projPanel = document.getElementById("sb-panel-projets");
-        if (!sidebar || !projPanel) return;
+        if (!sidebar) return;
         var sb = sidebar;
 
         // Page active (barre latérale et menu burger)
@@ -557,33 +462,5 @@ const cards = projets.map((p) => ({
                 btn.focus();
             }
         });
-
-        // Onglets catégories
-        var tabs = projPanel.querySelectorAll(".sb-tab");
-        var grid = projPanel.querySelector(".sb-grid");
-        var cards = Array.prototype.slice.call(projPanel.querySelectorAll(".sb-card")) as HTMLElement[];
-        function selectCat(cat: string) {
-            tabs.forEach(function (t) {
-                t.setAttribute("aria-selected", t.getAttribute("data-cat") === cat ? "true" : "false");
-            });
-            var inCat: HTMLElement[] = [];
-            var others: HTMLElement[] = [];
-            cards.forEach(function (c) {
-                var cats = (c.getAttribute("data-cats") || "").split(" ");
-                var match = cats.indexOf(cat) !== -1;
-                c.classList.toggle("is-dim", !match);
-                (match ? inCat : others).push(c);
-            });
-            if (grid) {
-                var g = grid;
-                inCat.concat(others).forEach(function (c) { g.appendChild(c); });
-            }
-        }
-        tabs.forEach(function (t) {
-            t.addEventListener("click", function () {
-                selectCat(t.getAttribute("data-cat") || "");
-            });
-        });
-        if (tabs[0]) selectCat(tabs[0].getAttribute("data-cat") || "");
     })();
 </script>
